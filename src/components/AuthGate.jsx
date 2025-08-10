@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { auth, isFirebaseConfigured } from '../lib/firebase'
+import { auth } from '../lib/firebase'
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 
 function AuthGate({ children }) {
@@ -7,10 +7,6 @@ function AuthGate({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      setLoading(false)
-      return
-    }
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)
@@ -42,19 +38,6 @@ function AuthGate({ children }) {
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center text-slate-600">Cargando…</div>
-    )
-  }
-
-  if (!isFirebaseConfigured) {
-    return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="card p-8 max-w-md w-full text-center space-y-6">
-          <h1 className="text-2xl font-bold text-slate-900">Configuración requerida</h1>
-          <p className="text-slate-600">
-            Faltan variables de entorno de Firebase. Define las variables <code>VITE_FIREBASE_*</code> en el entorno de build.
-          </p>
-        </div>
-      </div>
     )
   }
 
