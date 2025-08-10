@@ -37,11 +37,26 @@ if (!isFirebaseConfigured) {
     projectId: getEnv('VITE_FIREBASE_PROJECT_ID'),
     storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET'),
     messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID'),
-    appId: getEnv('VITE_FIREBASE_APP_ID')
+    appId: getEnv('VITE_FIREBASE_APP_ID'),
+    ...(getEnv('VITE_FIREBASE_MEASUREMENT_ID')
+      ? { measurementId: getEnv('VITE_FIREBASE_MEASUREMENT_ID') }
+      : {})
   }
   app = initializeApp(firebaseConfig)
   authInstance = getAuth(app)
   dbInstance = getFirestore(app)
+
+  // Logs informativos en desarrollo para verificar configuración
+  if (import.meta.env.DEV) {
+    // Evitar imprimir la API key completa
+    const apiKey = String(getEnv('VITE_FIREBASE_API_KEY') || '')
+    const apiKeyMasked = apiKey ? `${apiKey.slice(0, 6)}…${apiKey.slice(-4)}` : '(missing)'
+    /* eslint-disable no-console */
+    console.log('Firebase initialized with project:', getEnv('VITE_FIREBASE_PROJECT_ID'))
+    console.log('Firebase auth domain:', getEnv('VITE_FIREBASE_AUTH_DOMAIN'))
+    console.log('Firebase API key:', apiKey ? `✅ Present (${apiKeyMasked})` : '❌ Missing')
+    /* eslint-enable no-console */
+  }
 }
 
 export const auth = authInstance
