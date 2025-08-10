@@ -1,0 +1,288 @@
+import React, { useState } from 'react'
+import { UserPlus, Users, MailCheck, MailX, Trash2, Coins, CheckCircle2, Clock, Copy, Share2 } from 'lucide-react'
+import { QRCodeCanvas } from 'qrcode.react'
+import { useFriends } from '../hooks/useFriends'
+
+function FriendsView({ user, formatCurrency, showToast }) {
+  const { friendRequests, sentRequests, friends, claims, sendFriendRequest, acceptFriendRequest, rejectFriendRequest, removeFriend, createClaim, updateClaimStatus } = useFriends(user)
+  const [inviteUid, setInviteUid] = useState('')
+  const [claimData, setClaimData] = useState({ toUid: '', amount: '', description: '' })
+  const [updatingClaimId, setUpdatingClaimId] = useState(null)
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Amigos</h1>
+          <p className="text-slate-600">Añade amigos por su ID y gestiona solicitudes y reclamaciones</p>
+        </div>
+      </div>
+
+      {/* Añadir amigo */}
+      <div className="card p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-slate-900 flex items-center">
+            <UserPlus className="w-5 h-5 mr-2 text-indigo-600"/>
+            Agregar amigo por ID
+          </h3>
+        </div>
+        
+        <div className="space-y-4">
+          {/* Formulario para agregar amigo */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input 
+              value={inviteUid} 
+              onChange={(e)=>setInviteUid(e.target.value)} 
+              placeholder="UID del amigo" 
+              className="input-field flex-1" 
+            />
+            <button 
+              className="btn-primary whitespace-nowrap" 
+              onClick={async ()=>{ 
+                if (!inviteUid.trim()) return
+                await sendFriendRequest(inviteUid); 
+                setInviteUid(''); 
+                showToast && showToast('Solicitud enviada') 
+              }}
+              disabled={!inviteUid.trim()}
+            >
+              Enviar
+            </button>
+          </div>
+
+          {/* Tu ID */}
+          <div className="bg-slate-50 rounded-xl p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-slate-700 mb-2">Tu ID:</label>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm flex-1 break-all">
+                    {user?.uid}
+                  </span>
+                  <button
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                    title="Copiar ID"
+                    onClick={async ()=>{ 
+                      await navigator.clipboard.writeText(user?.uid || ''); 
+                      showToast && showToast('ID copiado'); 
+                    }}
+                  >
+                    <Copy className="w-4 h-4 text-slate-600" />
+                  </button>
+                  <button
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                    title="Compartir"
+                    onClick={async ()=>{
+                      const text = `Este es mi ID en SplitGo: ${user?.uid}`
+                      if (navigator.share) {
+                        try { await navigator.share({ title: 'Mi ID de SplitGo', text }) } catch {}
+                      } else {
+                        await navigator.clipboard.writeText(text)
+                        showToast && showToast('Texto copiado para compartir')
+                      }
+                    }}
+                  >
+                    <Share2 className="w-4 h-4 text-slate-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* QR Code */}
+              <div className="flex flex-col items-center sm:items-end">
+                <label className="block text-sm font-medium text-slate-700 mb-2 self-start sm:self-center">Código QR:</label>
+                <button
+                  aria-label="Mostrar código QR"
+                  className="rounded-lg border-2 border-slate-200 hover:border-indigo-300 hover:shadow-md active:scale-[0.98] transition-all duration-200 bg-white p-2"
+                  title="Toca para ampliar"
+                  onClick={()=>document.getElementById('qr-modal')?.showModal()}
+                >
+                  <QRCodeCanvas 
+                    value={user?.uid || ''} 
+                    size={64} 
+                    level="M" 
+                    includeMargin={false} 
+                    bgColor="#ffffff" 
+                    fgColor="#111827" 
+                  />
+                </button>
+                <span className="text-xs text-slate-500 mt-1 text-center">Toca para ampliar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <dialog id="qr-modal" className="rounded-2xl backdrop:bg-black/20 backdrop:backdrop-blur-sm">
+          <div className="p-6 bg-white rounded-2xl shadow-2xl max-w-sm mx-auto">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Mi código QR</h3>
+              <div className="bg-white p-4 rounded-xl border border-slate-200 inline-block">
+                <QRCodeCanvas 
+                  value={user?.uid || ''} 
+                  size={200} 
+                  level="H" 
+                  includeMargin={true} 
+                  bgColor="#ffffff" 
+                  fgColor="#111827" 
+                />
+              </div>
+              <div className="mt-4 text-sm text-slate-600">
+                Comparte este código para que te añadan como amigo
+              </div>
+              <div className="mt-4 text-xs text-slate-500 bg-slate-50 rounded-lg p-3">
+                <div className="font-mono break-all">{user?.uid}</div>
+              </div>
+              <div className="mt-6">
+                <button 
+                  className="btn-primary w-full" 
+                  onClick={()=>document.getElementById('qr-modal')?.close()}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </dialog>
+      </div>
+
+      {/* Solicitudes entrantes */}
+      {friendRequests.length > 0 && (
+        <div className="card p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+            <Users className="w-5 h-5 mr-2 text-emerald-600"/>
+            Solicitudes recibidas
+            <span className="ml-2 bg-emerald-100 text-emerald-800 text-xs font-medium px-2 py-1 rounded-full">
+              {friendRequests.length}
+            </span>
+          </h3>
+          <div className="space-y-3">
+            {friendRequests.map(r => (
+              <div key={r.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex-1">
+                  <div className="font-medium text-slate-900">{r.fromName || r.fromUid}</div>
+                  <div className="text-xs text-slate-500 font-mono">{r.fromUid}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={()=>acceptFriendRequest(r.id, r.fromUid)} 
+                    className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                    title="Aceptar"
+                  >
+                    <MailCheck className="w-4 h-4"/>
+                  </button>
+                  <button 
+                    onClick={()=>rejectFriendRequest(r.id, r.fromUid)} 
+                    className="px-3 py-2 bg-slate-300 text-slate-700 rounded-lg hover:bg-slate-400 transition-colors"
+                    title="Rechazar"
+                  >
+                    <MailX className="w-4 h-4"/>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Amigos */}
+      <div className="card p-6">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+          <Users className="w-5 h-5 mr-2 text-indigo-600"/>
+          Tus amigos
+          {friends.length > 0 && (
+            <span className="ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-1 rounded-full">
+              {friends.length}
+            </span>
+          )}
+        </h3>
+        {friends.length === 0 ? (
+          <div className="text-center py-8">
+            <Users className="w-12 h-12 text-slate-300 mx-auto mb-4"/>
+            <p className="text-slate-600 mb-2">Aún no tienes amigos añadidos</p>
+            <p className="text-sm text-slate-500">Envía solicitudes usando sus IDs para empezar</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {friends.map(f => (
+              <div key={f.uid} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex-1">
+                  <div className="font-medium text-slate-900">{f.username || f.displayName || f.uid}</div>
+                  <div className="text-xs text-slate-500 font-mono">{f.uid}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={()=>removeFriend(f.uid)} 
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Eliminar amigo"
+                  >
+                    <Trash2 className="w-4 h-4"/>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Reclamaciones */}
+      <div className="card p-6">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center"><Coins className="w-5 h-5 mr-2 text-amber-600"/>Reclamar pago</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select value={claimData.toUid} onChange={(e)=>setClaimData({...claimData, toUid: e.target.value})} className="input-field">
+            <option value="">Selecciona amigo</option>
+            {friends.map(f => <option key={f.uid} value={f.uid}>{f.username || f.displayName || f.uid}</option>)}
+          </select>
+          <input type="number" min="0" step="0.01" placeholder="Monto" value={claimData.amount} onChange={(e)=>setClaimData({...claimData, amount: e.target.value})} className="input-field" />
+          <input type="text" placeholder="Descripción (opcional)" value={claimData.description} onChange={(e)=>setClaimData({...claimData, description: e.target.value})} className="input-field" />
+        </div>
+        <div className="mt-3 flex justify-end">
+          <button className="btn-primary" onClick={async ()=>{ await createClaim(claimData); setClaimData({ toUid:'', amount:'', description:'' }); showToast && showToast('Reclamación creada') }}>Crear</button>
+        </div>
+
+        {claims.length > 0 && (
+          <div className="mt-6 space-y-3">
+            {claims.map(c => (
+              <div key={c.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                <div>
+                  <div className="font-medium text-slate-900">{c.fromUid === user.uid ? 'Tú reclamas a' : 'Te reclama'} {(() => {
+                    const otherUid = c.fromUid === user.uid ? c.toUid : c.fromUid
+                    const other = friends.find(fr => fr.uid === otherUid)
+                    return other?.username || other?.displayName || otherUid
+                  })()}</div>
+                  <div className="text-sm text-slate-600">{c.description || 'Sin descripción'}</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="font-bold">{formatCurrency ? formatCurrency(c.amount) : `€${Number(c.amount).toFixed(2)}`}</div>
+                  <div className={`text-xs px-2 py-1 rounded-full ${c.status==='pending' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>{c.status}</div>
+                  {c.status==='pending' && c.toUid === user.uid && (
+                    <button
+                      type="button"
+                      disabled={updatingClaimId === c.id}
+                      onClick={async ()=>{
+                        try {
+                          setUpdatingClaimId(c.id)
+                          await updateClaimStatus(c.id, 'paid')
+                          showToast && showToast('Marcado como pagado')
+                        } catch (e) {
+                          showToast && showToast('No se pudo actualizar la reclamación', 'error')
+                        } finally {
+                          setUpdatingClaimId(null)
+                        }
+                      }}
+                      className={`btn-primary py-2 ${updatingClaimId===c.id ? 'opacity-60 pointer-events-none' : ''}`}
+                    >
+                      <CheckCircle2 className="w-4 h-4"/>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default FriendsView
+
+
