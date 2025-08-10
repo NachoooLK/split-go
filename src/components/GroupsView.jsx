@@ -3,8 +3,7 @@ import { Users, Plus, ArrowRight, DollarSign, Clock, CheckCircle, AlertCircle, U
 import GroupDetails from './GroupDetails'
 import { useFriends } from '../hooks/useFriends'
 
-function GroupsView({ groups, categories, onAddGroup, onAddExpense, getGroupBalance, getMinimalTransfers, groupInvites = [], inviteUserToGroup, acceptGroupInvite, user, onDeleteExpense, joinGroupById, onEditExpense, onToggleSettled, onSettleExpense }) {
-  const [selectedGroup, setSelectedGroup] = useState(null)
+function GroupsView({ groups, categories, onAddGroup, onAddExpense, getGroupBalance, getMinimalTransfers, groupInvites = [], inviteUserToGroup, acceptGroupInvite, user, onDeleteExpense, joinGroupById, onEditExpense, onToggleSettled, selectedGroup, setSelectedGroup, onSettleExpense }) {
   const [inviteUid, setInviteUid] = useState('')
   const [joinId, setJoinId] = useState('')
   const { friends } = useFriends(user)

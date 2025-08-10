@@ -217,9 +217,18 @@ function App({ user, logout }) {
       >
         {activeTab === 'personal' && (
           <PersonalView
-            expenses={personalExpenses}
+            expenses={(function(){ const u = getUnifiedExpenses(); return u; })()}
             categories={CATEGORIES}
-            stats={getPersonalStats()}
+            stats={(function(){
+              const list = getUnifiedExpenses()
+              const now = new Date()
+              const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+              const total = list.reduce((s, e) => s + (Number(e.amount) || 0), 0)
+              const monthly = list.filter(e => (e.date instanceof Date ? e.date : new Date(e.date)) >= startOfMonth)
+                .reduce((s, e) => s + (Number(e.amount) || 0), 0)
+              const average = list.length ? total / list.length : 0
+              return { total: total.toFixed(2), monthly: monthly.toFixed(2), count: list.length, average: average.toFixed(2) }
+            })()}
             onAddExpense={() => {
               setSelectedGroup(null)
               setShowAddExpense(true)
@@ -259,6 +268,8 @@ function App({ user, logout }) {
             inviteUserToGroup={inviteUserToGroup}
             acceptGroupInvite={acceptGroupInvite}
             user={user}
+            selectedGroup={selectedGroup}
+            setSelectedGroup={setSelectedGroup}
             onDeleteExpense={async (groupId, expenseId)=>{
               try { await deleteGroupExpense(groupId, expenseId); showToast('Gasto eliminado') } catch { showToast('Error al eliminar', 'error') }
             }}
@@ -331,7 +342,11 @@ function App({ user, logout }) {
             setSelectedGroup(null)
             setShowAddExpense(true)
           } else if (activeTab === 'groups') {
-            setShowAddGroup(true)
+            if (selectedGroup) {
+              setShowAddExpense(true)
+            } else {
+              setShowAddGroup(true)
+            }
           } else if (activeTab === 'budgets') {
             // En presupuestos no hay FAB específico, se manejan desde el componente
             return

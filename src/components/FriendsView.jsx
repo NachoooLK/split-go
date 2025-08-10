@@ -20,11 +20,36 @@ function FriendsView({ user, formatCurrency, showToast }) {
       const incoming = normalizeUid(params.get('invite') || params.get('uid') || params.get('friend'))
       if (incoming && isLikelyUid(incoming)) {
         setInviteUid(incoming)
-        // No auto-enviamos para evitar spam involuntario
-        showToast && showToast('ID detectado del enlace. Revisa y pulsa Enviar.')
+        // Si hay usuario y no es el mismo UID, ofrecer auto-enviar
+        if (user?.uid && user.uid !== incoming) {
+          const shouldSend = window.confirm('Se ha detectado una invitación. ¿Quieres enviar solicitud a este ID ahora?')
+          if (shouldSend) {
+            ;(async () => {
+              try {
+                await sendFriendRequest(incoming)
+                setInviteUid('')
+                showToast && showToast('Solicitud enviada')
+              } catch (e) {
+                showToast && showToast('No se pudo enviar la solicitud', 'error')
+              }
+            })()
+          } else {
+            showToast && showToast('ID detectado. Puedes revisar y enviar manualmente.')
+          }
+        } else if (user?.uid === incoming) {
+          showToast && showToast('Ese es tu propio ID. No puedes agregarte a ti mismo.', 'error')
+        }
+        // Limpiar query para evitar reintentos en navegación posterior
+        if (window.history?.replaceState) {
+          const url = new URL(window.location.href)
+          url.searchParams.delete('invite')
+          url.searchParams.delete('uid')
+          url.searchParams.delete('friend')
+          window.history.replaceState({}, '', url.pathname + (url.search ? `?${url.searchParams.toString()}` : '') + url.hash)
+        }
       }
     } catch {}
-  }, [])
+  }, [user?.uid])
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">

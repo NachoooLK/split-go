@@ -104,6 +104,7 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
     const category = categories[expense.category]
     const [isEditing, setIsEditing] = useState(false)
     const [editData, setEditData] = useState({ description: expense.description, amount: expense.amount.toString(), category: expense.category, date: new Date(expense.date).toISOString().split('T')[0] })
+    const isGroupShare = expense.source === 'groupShare'
     const colorClasses = {
       orange: 'bg-orange-100 text-orange-800 border-orange-200',
       blue: 'bg-blue-100 text-blue-800 border-blue-200',
@@ -168,12 +169,23 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
               <>
                 <p className="text-2xl font-bold text-slate-900">{formatCurrency ? formatCurrency(expense.amount) : `€${expense.amount.toFixed(2)}`}</p>
                 <div className="flex items-center justify-end space-x-2 mt-1 sm:mt-2">
-                  <button onClick={()=>setIsEditing(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"><Pencil className="w-4 h-4"/></button>
-                  <button onClick={()=>onDeleteExpense(expense.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4"/></button>
+                  {!isGroupShare ? (
+                    <>
+                      <button onClick={()=>setIsEditing(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"><Pencil className="w-4 h-4"/></button>
+                      <button onClick={()=>onDeleteExpense(expense.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4"/></button>
+                    </>
+                  ) : (
+                    <span className="px-2 py-1 text-xs rounded-lg bg-slate-100 text-slate-600 border border-slate-200">De grupo</span>
+                  )}
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClasses[category.color]}`}>
-                  {category.name}
-                </span>
+                <div className="flex items-center justify-end gap-2 mt-1">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClasses[category.color]}`}>
+                    {category.name}
+                  </span>
+                  {isGroupShare && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-indigo-50 text-indigo-700 border-indigo-200">Tu parte</span>
+                  )}
+                </div>
               </>
             )}
           </div>
