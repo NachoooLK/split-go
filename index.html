@@ -2,10 +2,39 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Viewport optimizado para móvil -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>SplitGo - Gestión de Gastos</title>
-    <meta name="description" content="SplitGo: divide y salda gastos con amigos de forma rápida, inteligente y en tiempo real." />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Split Go" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    
+    <!-- Prevenir zoom en inputs (iOS) -->
+    <style>
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+      /* Ocultar scrollbars en Webkit para look más nativo */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+    </style>
+    
+    <title>Split Go - Gestión de Gastos</title>
+    <meta name="description" content="Split Go: divide y salda gastos con amigos de forma rápida, inteligente y en tiempo real." />
   </head>
   <body>
     <div id="root"></div>

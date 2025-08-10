@@ -1,0 +1,22 @@
+{
+  "name": "Split Go - Gestor de Gastos",
+  "short_name": "Split Go",
+  "description": "Aplicación de gestión de gastos personales y grupales",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "lang": "es",
+  "dir": "ltr"
+}

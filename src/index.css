@@ -3,6 +3,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Optimizaciones PWA móvil */
+@layer base {
+  html {
+    /* Prevenir bounce scroll en iOS */
+    overscroll-behavior-y: none;
+    /* Mejorar rendimiento scroll */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  body {
+    /* Prevenir selección de texto en gestos */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Pero permitir selección en inputs */
+  }
+  
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+}
+
 @layer base {
   * {
     -webkit-font-smoothing: antialiased;
