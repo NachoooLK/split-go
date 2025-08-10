@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { db } from '../lib/firebase'
+import { db, isFirebaseConfigured } from '../lib/firebase'
 import {
   collection,
   addDoc,
@@ -109,7 +109,7 @@ export function useAppState(user) {
   // Suscripciones a Firestore
   useEffect(() => {
     // Personal expenses
-    if (!user) return
+    if (!user || !isFirebaseConfigured) return
 
     const unsubPersonal = onSnapshot(
       query(collection(db, 'users', user.uid, 'personalExpenses'), orderBy('createdAt', 'desc')),
