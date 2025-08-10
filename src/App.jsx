@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { User, Users, Plus, BarChart3, Target, Settings as SettingsIcon, UserPlus } from 'lucide-react'
 import PersonalView from './components/PersonalView'
 import GroupsView from './components/GroupsView'
@@ -68,6 +68,16 @@ function App({ user, logout }) {
     setTimeout(() => setToast(null), 3000)
   }
 
+  // Autofill de invitación desde URL: cambiar a pestaña Amigos
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      if (params.has('invite') || params.has('uid') || params.has('friend')) {
+        setActiveTab('friends')
+      }
+    } catch {}
+  }, [])
+
   const handleAddExpense = async (expense) => {
     try {
       if (selectedGroup) {
@@ -127,7 +137,7 @@ function App({ user, logout }) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-indigo-50 overflow-x-hidden">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -189,7 +199,7 @@ function App({ user, logout }) {
 
       {/* Main Content */}
       <main
-        className="flex-1 overflow-y-auto pb-24 sm:pb-0 pb-safe"
+        className="flex-1 overflow-y-auto overflow-x-hidden pb-24 sm:pb-0 pb-safe"
         onTouchStart={(e)=>{ window.__swipeX = e.touches[0].clientX; window.__swipeY = e.touches[0].clientY; }}
         onTouchEnd={(e)=>{
           const startX = window.__swipeX, startY = window.__swipeY

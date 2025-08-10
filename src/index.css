@@ -6,6 +6,9 @@
 /* Optimizaciones PWA móvil */
 @layer base {
   html {
+    /* Evitar desplazamiento horizontal global */
+    overflow-x: hidden;
+    width: 100%;
     /* Prevenir bounce scroll en iOS */
     overscroll-behavior-y: none;
     /* Mejorar rendimiento scroll */
@@ -13,6 +16,10 @@
   }
   
   body {
+    /* Evitar desplazamiento horizontal global */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
     /* Prevenir selección de texto en gestos */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -29,6 +36,13 @@
     -moz-user-select: text;
     -ms-user-select: text;
     user-select: text;
+  }
+  
+  /* Asegurar que el contenedor raíz no produzca overflow horizontal */
+  #root {
+    min-height: 100%;
+    overflow-x: hidden;
+    width: 100%;
   }
 }
 

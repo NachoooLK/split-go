@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { UserPlus, Users, MailCheck, MailX, Trash2, Coins, CheckCircle2, Clock, Copy, Share2 } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useFriends } from '../hooks/useFriends'
@@ -8,6 +8,23 @@ function FriendsView({ user, formatCurrency, showToast }) {
   const [inviteUid, setInviteUid] = useState('')
   const [claimData, setClaimData] = useState({ toUid: '', amount: '', description: '' })
   const [updatingClaimId, setUpdatingClaimId] = useState(null)
+
+  // Helpers
+  const normalizeUid = (value) => String(value || '').trim()
+  const isLikelyUid = (value) => /^[A-Za-z0-9:_-]{6,128}$/.test(String(value || ''))
+
+  // Detectar UID desde la URL (?invite=...)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const incoming = normalizeUid(params.get('invite') || params.get('uid') || params.get('friend'))
+      if (incoming && isLikelyUid(incoming)) {
+        setInviteUid(incoming)
+        // No auto-enviamos para evitar spam involuntario
+        showToast && showToast('ID detectado del enlace. Revisa y pulsa Enviar.')
+      }
+    } catch {}
+  }, [])
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
@@ -39,12 +56,18 @@ function FriendsView({ user, formatCurrency, showToast }) {
             <button 
               className="btn-primary whitespace-nowrap" 
               onClick={async ()=>{ 
-                if (!inviteUid.trim()) return
-                await sendFriendRequest(inviteUid); 
-                setInviteUid(''); 
-                showToast && showToast('Solicitud enviada') 
+                const uid = normalizeUid(inviteUid)
+                if (!uid || !isLikelyUid(uid)) { showToast && showToast('UID inválido', 'error'); return }
+                if (uid === user?.uid) { showToast && showToast('No puedes agregarte a ti mismo', 'error'); return }
+                try {
+                  await sendFriendRequest(uid)
+                  setInviteUid('')
+                  showToast && showToast('Solicitud enviada')
+                } catch (e) {
+                  showToast && showToast('No se pudo enviar la solicitud', 'error')
+                }
               }}
-              disabled={!inviteUid.trim()}
+              disabled={!normalizeUid(inviteUid)}
             >
               Enviar
             </button>
@@ -73,9 +96,10 @@ function FriendsView({ user, formatCurrency, showToast }) {
                     className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                     title="Compartir"
                     onClick={async ()=>{
-                      const text = `Este es mi ID en SplitGo: ${user?.uid}`
+                      const link = `${window.location.origin}/?invite=${user?.uid}`
+                      const text = `Agrega mi ID en SplitGo: ${user?.uid}\n${link}`
                       if (navigator.share) {
-                        try { await navigator.share({ title: 'Mi ID de SplitGo', text }) } catch {}
+                        try { await navigator.share({ title: 'Mi ID de SplitGo', text, url: link }) } catch {}
                       } else {
                         await navigator.clipboard.writeText(text)
                         showToast && showToast('Texto copiado para compartir')
@@ -97,7 +121,7 @@ function FriendsView({ user, formatCurrency, showToast }) {
                   onClick={()=>document.getElementById('qr-modal')?.showModal()}
                 >
                   <QRCodeCanvas 
-                    value={user?.uid || ''} 
+                    value={(typeof window !== 'undefined' && user?.uid) ? `${window.location.origin}/?invite=${user.uid}` : (user?.uid || '')} 
                     size={64} 
                     level="M" 
                     includeMargin={false} 
@@ -117,7 +141,7 @@ function FriendsView({ user, formatCurrency, showToast }) {
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Mi código QR</h3>
               <div className="bg-white p-4 rounded-xl border border-slate-200 inline-block">
                 <QRCodeCanvas 
-                  value={user?.uid || ''} 
+                  value={(typeof window !== 'undefined' && user?.uid) ? `${window.location.origin}/?invite=${user.uid}` : (user?.uid || '')} 
                   size={200} 
                   level="H" 
                   includeMargin={true} 
