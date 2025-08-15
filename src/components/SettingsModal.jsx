@@ -1,17 +1,8 @@
-import React, { useMemo, useState, useEffect } from 'react'
-import { Sun, Moon, Monitor, Eye, EyeOff, Key } from 'lucide-react'
+import React, { useMemo } from 'react'
+import { Sun, Moon, Monitor } from 'lucide-react'
 import { LANG_OPTIONS } from '../lib/i18n'
 
 function SettingsModal({ open, onClose, settings, onSave, currencies = ['EUR','USD','MXN','COP','ARS','CLP'] }) {
-  const [showApiKey, setShowApiKey] = useState(false)
-  const [geminiApiKey, setGeminiApiKey] = useState(localStorage.getItem('gemini_api_key') || 'AIzaSyCdECa_ugdOp-pa06hY0VRNITfIRNn0EA4')
-  
-  // Guardar automáticamente la API key si no existe en localStorage
-  useEffect(() => {
-    if (!localStorage.getItem('gemini_api_key') && geminiApiKey) {
-      localStorage.setItem('gemini_api_key', geminiApiKey)
-    }
-  }, [geminiApiKey])
   
   // Mover hooks antes del return condicional para evitar violación de reglas de hooks
   const languageCodes = ['es','en']
@@ -33,13 +24,7 @@ function SettingsModal({ open, onClose, settings, onSave, currencies = ['EUR','U
     return code
   }
 
-  const handleSaveApiKey = () => {
-    if (geminiApiKey.trim()) {
-      localStorage.setItem('gemini_api_key', geminiApiKey.trim())
-    } else {
-      localStorage.removeItem('gemini_api_key')
-    }
-  }
+
   
   if (!open) return null
   return (
@@ -111,56 +96,7 @@ function SettingsModal({ open, onClose, settings, onSave, currencies = ['EUR','U
               </div>
             </div>
 
-            {/* Google Generative AI API Key */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2 flex items-center space-x-2">
-                <Key className="w-4 h-4" />
-                <span>API Key de Google Generative AI</span>
-              </label>
-              <p className="text-xs text-slate-600 dark:text-gray-400 mb-3">
-                Necesaria para la función de escanear tickets. 
-                <a 
-                  href="https://makersuite.google.com/app/apikey" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-indigo-600 dark:text-indigo-400 hover:underline ml-1"
-                >
-                  Obtén tu API key aquí
-                </a>
-              </p>
-              <div className="relative">
-                <input
-                  type={showApiKey ? "text" : "password"}
-                  value={geminiApiKey}
-                  onChange={(e) => setGeminiApiKey(e.target.value)}
-                  onBlur={handleSaveApiKey}
-                  placeholder="Ingresa tu API key de Google Generative AI"
-                  className="input-field pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-gray-500 dark:hover:text-gray-300"
-                >
-                  {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              {geminiApiKey && (
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                  ✅ API key configurada correctamente
-                </p>
-              )}
-              {!geminiApiKey && (
-                <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                  ⚠️ La función de escanear tickets no estará disponible sin API key
-                </p>
-              )}
-              {geminiApiKey === 'AIzaSyCdECa_ugdOp-pa06hY0VRNITfIRNn0EA4' && (
-                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                  🎉 API key preconfigurada - ¡Lista para usar!
-                </p>
-              )}
-            </div>
+            
           </div>
         </div>
       </div>

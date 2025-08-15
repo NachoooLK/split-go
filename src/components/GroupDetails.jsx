@@ -1,11 +1,16 @@
 import React, { useState, useMemo } from 'react'
-import { ArrowLeft, Plus, Users, DollarSign, ArrowRight, CheckCircle, XCircle, CreditCard, AlertTriangle, Link, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Plus, Users, DollarSign, ArrowRight, CheckCircle, XCircle, CreditCard, AlertTriangle, Link, BarChart3, Filter, Search, Calendar, Tag, Eye, EyeOff } from 'lucide-react'
 import GroupInviteDisplay from './GroupInviteDisplay'
 
 function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupBalance, getMinimalTransfers, onEditExpense, onDeleteExpense, onToggleSettled, onSettleExpense }) {
   const [activeTab, setActiveTab] = useState('expenses')
   const [settleForExpense, setSettleForExpense] = useState(null)
   const [selectedSettled, setSelectedSettled] = useState([])
+  
+  // Estados para filtros de gastos
+  const [expenseFilter, setExpenseFilter] = useState('all') // all, my, others, pending
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [showFilters, setShowFilters] = useState(false)
   
   const balances = getGroupBalance(group.id)
   const transfers = getMinimalTransfers(group.id)
@@ -82,8 +87,108 @@ function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupB
     }
   }, [group.expenses, group.members, group.membersUids, balances, user])
 
+  // Gastos filtrados
+  const filteredExpenses = useMemo(() => {
+    let filtered = group.expenses.filter(expense => expense.amount > 0)
+    
+    // Obtener nombre del usuario actual
+    const currentUserName = userMetrics.memberName
+    
+    // Filtro por tipo
+    switch (expenseFilter) {
+      case 'my':
+        filtered = filtered.filter(expense => expense.paidBy === currentUserName)
+        break
+      case 'others':
+        filtered = filtered.filter(expense => expense.paidBy !== currentUserName)
+        break
+      case 'pending':
+        filtered = filtered.filter(expense => {
+          const settledBy = Array.isArray(expense.settledBy) ? expense.settledBy : []
+          return expense.splitBetween.some(member => !settledBy.includes(member))
+        })
+        break
+    }
+    
+    // Filtro por categoría
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(expense => expense.category === categoryFilter)
+    }
+    
+    return filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
+  }, [group.expenses, expenseFilter, categoryFilter, userMetrics.memberName])
+
   const ExpensesList = () => (
     <div className="space-y-4">
+      {/* Filtros rápidos */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-gray-100">Filtros rápidos</h3>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center space-x-1"
+          >
+            {showFilters ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <span>{showFilters ? 'Ocultar' : 'Más filtros'}</span>
+          </button>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {[
+            { key: 'all', label: 'Todos', icon: Users },
+            { key: 'my', label: 'Mis gastos', icon: CreditCard },
+            { key: 'others', label: 'Otros', icon: Users },
+            { key: 'pending', label: 'Pendientes', icon: AlertTriangle }
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setExpenseFilter(key)}
+              className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                expenseFilter === key
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              <Icon className="w-3 h-3" />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+        
+        {showFilters && (
+          <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-600">
+            <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-2">Categoría</label>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full p-2 text-sm bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-gray-100"
+            >
+              <option value="all">Todas las categorías</option>
+              {Object.entries(categories).map(([key, category]) => (
+                <option key={key} value={key}>{category.emoji} {category.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        
+        {(expenseFilter !== 'all' || categoryFilter !== 'all') && (
+          <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-600 flex items-center justify-between">
+            <span className="text-xs text-slate-600 dark:text-gray-400">
+              {filteredExpenses.length} de {group.expenses.filter(e => e.amount > 0).length} gastos
+            </span>
+            <button
+              onClick={() => {
+                setExpenseFilter('all')
+                setCategoryFilter('all')
+              }}
+              className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        )}
+      </div>
+
       {group.expenses.length === 0 ? (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -103,12 +208,37 @@ function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupB
             Añadir gasto
           </button>
         </div>
+      ) : filteredExpenses.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="w-12 h-12 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Filter className="w-6 h-6 text-slate-500 dark:text-gray-400" />
+          </div>
+          <h3 className="text-md font-medium text-slate-700 dark:text-gray-300 mb-2">
+            No hay gastos con estos filtros
+          </h3>
+          <p className="text-sm text-slate-500 dark:text-gray-400 mb-3">
+            Prueba cambiando los filtros o agregando un nuevo gasto
+          </p>
+          <button
+            onClick={() => {
+              setExpenseFilter('all')
+              setCategoryFilter('all')
+            }}
+            className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+          >
+            Ver todos los gastos
+          </button>
+        </div>
       ) : (
         <div className="space-y-3">
-          {group.expenses.map((expense, index) => {
+          {filteredExpenses.map((expense, index) => {
             const category = categories[expense.category]
             const sharePerPerson = expense.amount / expense.splitBetween.length
             const settledBy = Array.isArray(expense.settledBy) ? expense.settledBy : []
+            
+            // Verificar si es mi gasto
+            const isMyExpense = expense.paidBy === userMetrics.memberName
+            const hasUnsettled = expense.splitBetween.some(member => !settledBy.includes(member))
             
             return (
               <div
@@ -123,8 +253,14 @@ function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupB
                   }
                   e.currentTarget.__sx = null
                 }}
-                className="card p-3 sm:p-4 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className={`card p-4 animate-fade-in transition-all duration-200 hover:shadow-md border-l-4 ${
+                  isMyExpense 
+                    ? 'border-l-indigo-500 bg-indigo-50/30 dark:bg-indigo-900/10' 
+                    : hasUnsettled
+                      ? 'border-l-amber-500 bg-amber-50/30 dark:bg-amber-900/10'
+                      : 'border-l-green-500 bg-green-50/30 dark:bg-green-900/10'
+                }`}
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3 sm:space-x-4">
@@ -132,56 +268,101 @@ function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupB
                       <span className="text-xl">{category.emoji}</span>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-slate-900 mb-1 truncate">
-                        {expense.description}
-                      </h3>
-                      <p className="text-sm text-slate-600 mb-2">
-                        Pagado por <span className="font-medium">{expense.paidBy}</span> • {' '}
-                        {expense.date.toLocaleDateString('es-ES', { 
-                          weekday: 'short', 
-                          day: 'numeric', 
-                          month: 'short' 
-                        })}
-                      </p>
+                      <div className="flex items-center space-x-2 mb-1">
+                        <h3 className="font-semibold text-slate-900 dark:text-gray-100 truncate">
+                          {expense.description}
+                        </h3>
+                        {isMyExpense && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
+                            Tú
+                          </span>
+                        )}
+                        {hasUnsettled && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
+                            Pendiente
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-3 text-sm text-slate-600 dark:text-gray-400 mb-2">
+                        <span>
+                          Pagado por <span className="font-medium text-slate-900 dark:text-gray-100">{expense.paidBy}</span>
+                        </span>
+                        <span>•</span>
+                        <span>
+                          {expense.date.toLocaleDateString('es-ES', { 
+                            weekday: 'short', 
+                            day: 'numeric', 
+                            month: 'short' 
+                          })}
+                        </span>
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         {expense.splitBetween.map((member, idx) => {
                           const isSettled = settledBy.includes(member)
+                          const isCurrentUser = member === userMetrics.memberName
                           return (
                             <span
                               key={idx}
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${isSettled ? 'bg-green-100 text-green-700 border-green-200' : 'bg-slate-100 text-slate-700 border-slate-200'}`}
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border transition-colors ${
+                                isSettled 
+                                  ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700' 
+                                  : isCurrentUser
+                                    ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700'
+                                    : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+                              }`}
                             >
-                              {member} (€{sharePerPerson.toFixed(2)})
+                              {isCurrentUser ? 'Tú' : member} 
+                              <span className="ml-1 font-semibold">€{sharePerPerson.toFixed(2)}</span>
+                              {isSettled && <CheckCircle className="ml-1 w-3 h-3" />}
                             </span>
                           )
                         })}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xl sm:text-2xl font-bold text-slate-900">
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-gray-100 mb-1">
                       €{expense.amount.toFixed(2)}
                     </div>
-                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      category.color === 'orange' ? 'bg-orange-100 text-orange-800' :
-                      category.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                      category.color === 'purple' ? 'bg-purple-100 text-purple-800' :
-                      category.color === 'pink' ? 'bg-pink-100 text-pink-800' :
-                      category.color === 'red' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
+                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 ${
+                      category.color === 'orange' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' :
+                      category.color === 'blue' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                      category.color === 'purple' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' :
+                      category.color === 'pink' ? 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300' :
+                      category.color === 'red' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                     }`}>
                       {category.name}
                     </div>
-                    <div className="mt-2">
-                      <button
-                        className="btn-secondary py-1 px-2 text-xs"
-                        onClick={() => {
-                          setSettleForExpense(expense)
-                          setSelectedSettled(Array.isArray(expense.settledBy) ? [...expense.settledBy] : [])
-                        }}
-                      >
-                        Registrar pago
-                      </button>
+                    
+                    {/* División detallada info */}
+                    {expense.useDetailedSplit && expense.items && (
+                      <div className="mb-2 p-1.5 bg-slate-100 dark:bg-gray-700 rounded text-xs text-slate-600 dark:text-gray-400">
+                        <div className="flex items-center space-x-1">
+                          <Tag className="w-3 h-3" />
+                          <span>{expense.items.length} items</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="space-y-1">
+                      {hasUnsettled && (
+                        <button
+                          className="w-full btn-secondary py-1 px-2 text-xs"
+                          onClick={() => {
+                            setSettleForExpense(expense)
+                            setSelectedSettled(Array.isArray(expense.settledBy) ? [...expense.settledBy] : [])
+                          }}
+                        >
+                          Registrar pago
+                        </button>
+                      )}
+                      <div className="text-xs text-slate-500 dark:text-gray-400">
+                        {expense.splitBetween.length === settledBy.length 
+                          ? '✅ Completado' 
+                          : `${settledBy.length}/${expense.splitBetween.length} pagado${settledBy.length !== 1 ? 's' : ''}`
+                        }
+                      </div>
                     </div>
                   </div>
                 </div>

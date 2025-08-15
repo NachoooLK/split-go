@@ -17,7 +17,8 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
 
   // Filtros combinados
   const filteredExpenses = useMemo(() => {
-    let filtered = expenses
+    // Primero filtrar solo gastos personales (excluir los de grupo)
+    let filtered = expenses.filter(expense => expense.source !== 'groupShare')
 
     // Filtro de búsqueda
     if (searchTerm) {
@@ -104,7 +105,6 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
     const category = categories[expense.category]
     const [isEditing, setIsEditing] = useState(false)
     const [editData, setEditData] = useState({ description: expense.description, amount: expense.amount.toString(), category: expense.category, date: new Date(expense.date).toISOString().split('T')[0] })
-    const isGroupShare = expense.source === 'groupShare'
     const colorClasses = {
       orange: 'bg-orange-100 text-orange-800 border-orange-200',
       blue: 'bg-blue-100 text-blue-800 border-blue-200',
@@ -127,68 +127,129 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
 
     return (
       <div 
-        className="card p-3 sm:p-4 card-hover animate-fade-in"
+        className={`group relative bg-white dark:bg-gray-800 rounded-xl border transition-all duration-300 animate-fade-in ${
+          isEditing 
+            ? 'border-indigo-300 dark:border-indigo-500 shadow-lg shadow-indigo-500/10 p-2' 
+            : 'border-slate-200 dark:border-gray-700 p-3 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg hover:shadow-indigo-500/10'
+        }`}
         style={{ animationDelay: `${index * 0.1}s` }}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center">
-              <span className="text-xl">{category.emoji}</span>
-            </div>
-            {isEditing ? (
-              <div className="space-y-2">
-                <input className="input-field" value={editData.description} onChange={(e)=>setEditData({...editData, description:e.target.value})} />
-                <div className="flex space-x-2">
-                  <input className="input-field" inputMode="decimal" value={editData.amount} onChange={(e)=>setEditData({...editData, amount:e.target.value})} />
-                  <select className="input-field" value={editData.category} onChange={(e)=>setEditData({...editData, category:e.target.value})}>
-                    {Object.entries(categories).map(([k,c])=> <option key={k} value={k}>{c.emoji} {c.name}</option>)}
-                  </select>
-                  <input type="date" className="input-field" value={editData.date} onChange={(e)=>setEditData({...editData, date:e.target.value})} />
+        <div className="flex items-start gap-3">
+          {/* Icono de categoría */}
+          <div className="w-11 h-11 bg-gradient-to-br from-white to-slate-50 dark:from-gray-700 dark:to-gray-800 rounded-xl border border-slate-200 dark:border-gray-600 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-200">
+            <span className="text-xl">{category.emoji}</span>
+          </div>
+          
+          {isEditing ? (
+              <div className="flex-1 bg-slate-50 dark:bg-gray-700/50 rounded-lg p-3 space-y-3">
+                {/* Descripción */}
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-1">Descripción</label>
+                  <input 
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                    placeholder="¿En qué gastaste?"
+                    value={editData.description} 
+                    onChange={(e)=>setEditData({...editData, description:e.target.value})} 
+                  />
+                </div>
+                
+                {/* Fila de campos */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-1">Cantidad</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-400 text-sm">€</span>
+                      <input 
+                        className="w-full pl-7 pr-3 py-2 text-sm bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all tabular-nums" 
+                        inputMode="decimal" 
+                        placeholder="0.00"
+                        value={editData.amount} 
+                        onChange={(e)=>setEditData({...editData, amount:e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-1">Categoría</label>
+                    <select 
+                      className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none"
+                      value={editData.category} 
+                      onChange={(e)=>setEditData({...editData, category:e.target.value})}
+                    >
+                      {Object.entries(categories).map(([k,c])=> <option key={k} value={k}>{c.emoji} {c.name}</option>)}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-1">Fecha</label>
+                    <input 
+                      type="date" 
+                      className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                      value={editData.date} 
+                      onChange={(e)=>setEditData({...editData, date:e.target.value})} 
+                    />
+                  </div>
+                </div>
+                
+                {/* Botones de acción */}
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-gray-600">
+                  <button 
+                    onClick={()=>setIsEditing(false)} 
+                    className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    onClick={saveEdit} 
+                    className="px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-medium rounded-lg transition-colors duration-200 flex items-center gap-1.5"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    Guardar
+                  </button>
                 </div>
               </div>
             ) : (
-              <div>
-                <h3 className="font-semibold text-slate-900 dark:text-gray-100 truncate max-w-[180px] sm:max-w-none">{expense.description}</h3>
-                <p className="text-sm text-slate-600 dark:text-gray-400">
-                  {expense.date.toLocaleDateString('es-ES', { 
-                    weekday: 'short', 
-                    day: 'numeric', 
-                    month: 'short' 
-                  })}
-                </p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 dark:text-gray-100 text-base leading-tight truncate pr-2">{expense.description}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <time className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+                        {expense.date.toLocaleDateString('es-ES', { 
+                          day: 'numeric', 
+                          month: 'short' 
+                        })}
+                      </time>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${colorClasses[category.color]} shadow-sm`}>
+                        {category.name}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-slate-900 dark:text-gray-100 tabular-nums">
+                      {formatCurrency ? formatCurrency(expense.amount) : `€${expense.amount.toFixed(2)}`}
+                    </p>
+                    <div className="flex items-center justify-end gap-1 mt-1">
+                      <button 
+                        onClick={()=>setIsEditing(true)} 
+                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                        title="Editar gasto"
+                      >
+                        <Pencil className="w-4 h-4"/>
+                      </button>
+                      <button 
+                        onClick={()=>onDeleteExpense(expense.id)} 
+                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                        title="Eliminar gasto"
+                      >
+                        <Trash2 className="w-4 h-4"/>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
-          </div>
-          <div className="text-right">
-            {isEditing ? (
-              <div className="flex items-center space-x-2">
-                <button onClick={saveEdit} className="btn-primary py-2"><Save className="w-4 h-4" /></button>
-                <button onClick={()=>setIsEditing(false)} className="btn-secondary py-2"><X className="w-4 h-4" /></button>
-              </div>
-            ) : (
-              <>
-                <p className="text-2xl font-bold text-slate-900 dark:text-gray-100">{formatCurrency ? formatCurrency(expense.amount) : `€${expense.amount.toFixed(2)}`}</p>
-                <div className="flex items-center justify-end space-x-2 mt-1 sm:mt-2">
-                  {!isGroupShare ? (
-                    <>
-                      <button onClick={()=>setIsEditing(true)} className="p-2 text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"><Pencil className="w-4 h-4"/></button>
-                      <button onClick={()=>onDeleteExpense(expense.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"><Trash2 className="w-4 h-4"/></button>
-                    </>
-                  ) : (
-                    <span className="px-2 py-1 text-xs rounded-lg bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-gray-600">De grupo</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-end gap-2 mt-1">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClasses[category.color]}`}>
-                    {category.name}
-                  </span>
-                  {isGroupShare && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-indigo-50 text-indigo-700 border-indigo-200">Tu parte</span>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+
         </div>
       </div>
     )
@@ -328,38 +389,38 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
       {showExpensesModal && (
         <div className="modal-backdrop z-[55]" onClick={()=>setShowExpensesModal(false)}>
           <div className="modal-content z-[55]" onClick={(e)=>e.stopPropagation()}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full mx-auto animate-scale-in p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100">Filtrar gastos</h3>
-                <button className="btn-secondary py-2" onClick={()=>setShowExpensesModal(false)}>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-3xl w-full mx-auto animate-scale-in p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold text-slate-900 dark:text-gray-100">Filtrar gastos</h3>
+                <button className="btn-secondary py-1.5 px-2" onClick={()=>setShowExpensesModal(false)}>
                   <X className="w-4 h-4" />
                 </button>
               </div>
               
               {/* Filtros de búsqueda */}
-              <div className="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl p-4 mb-4 shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="bg-slate-50 dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg p-3 mb-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   <div className="relative">
-                    <label className="block text-xs font-semibold text-slate-800 dark:text-gray-200 mb-1">Buscar</label>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-1">Buscar</label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input 
                         type="text" 
                         placeholder="Buscar por descripción..." 
                         value={searchTerm} 
                         onChange={(e)=>setSearchTerm(e.target.value)} 
-                        className="w-full pl-10 pr-4 py-2 h-10 text-sm bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 placeholder-slate-500 dark:placeholder-gray-400 text-slate-900 dark:text-gray-100" 
+                        className="w-full pl-8 pr-3 py-1.5 h-8 text-sm bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors placeholder-slate-400 dark:placeholder-gray-500 text-slate-900 dark:text-gray-100" 
                       />
                     </div>
                   </div>
                   <div className="relative">
-                    <label className="block text-xs font-semibold text-slate-800 dark:text-gray-200 mb-1">Categoría</label>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-1">Categoría</label>
                     <div className="relative">
-                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Tag className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                       <select 
                         value={selectedCategory} 
                         onChange={(e)=>setSelectedCategory(e.target.value)} 
-                        className="w-full pl-9 pr-10 py-2 h-10 text-sm bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-slate-900 dark:text-gray-100"
+                        className="w-full pl-7 pr-8 py-1.5 h-8 text-sm bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-500 rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-slate-900 dark:text-gray-100"
                       >
                         <option value="all">Todas las categorías</option>
                         {Object.entries(categories).map(([key, category]) => (
@@ -367,21 +428,21 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                         ))}
                       </select>
                       {/* Flecha personalizada para el select */}
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </div>
                     </div>
                   </div>
                   <div className="relative">
-                    <label className="block text-xs font-semibold text-slate-800 dark:text-gray-200 mb-1">Fecha</label>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-1">Fecha</label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                       <select 
                         value={dateFilter} 
                         onChange={(e)=>setDateFilter(e.target.value)} 
-                        className="w-full pl-9 pr-10 py-2 h-10 text-sm bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-slate-900 dark:text-gray-100"
+                        className="w-full pl-7 pr-8 py-1.5 h-8 text-sm bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-500 rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-slate-900 dark:text-gray-100"
                       >
                         <option value="all">Todas las fechas</option>
                         <option value="today">Hoy</option>
@@ -389,8 +450,8 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                         <option value="month">Último mes</option>
                       </select>
                       {/* Flecha personalizada para el select */}
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </div>
@@ -399,7 +460,7 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                 </div>
                 
                 {/* Resumen de filtros */}
-                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-600 flex items-center justify-between text-sm">
+                <div className="mt-2 pt-2 border-t border-slate-200 dark:border-gray-600 flex items-center justify-between text-xs">
                   <div className="flex items-center space-x-3">
                     <span className="font-medium text-slate-800 dark:text-gray-200">
                       {filteredExpenses.length} gastos
@@ -430,7 +491,7 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                 <EmptyState />
               ) : (
                 <>
-                  <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                  <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
                     {paginatedExpenses.map((expense, index) => (
                       <div key={expense.id}>
                         <ExpenseItem expense={expense} index={index} />
@@ -438,9 +499,9 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                     ))}
                   </div>
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-center space-x-2 pt-4">
+                    <div className="flex items-center justify-center space-x-1 pt-3">
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                        <button key={page} onClick={() => setCurrentPage(page)} className={`w-9 h-9 rounded-lg text-sm font-medium ${currentPage===page? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}>{page}</button>
+                        <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 rounded-md text-xs font-medium ${currentPage===page? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}>{page}</button>
                       ))}
                     </div>
                   )}
