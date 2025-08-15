@@ -328,19 +328,19 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
       {showExpensesModal && (
         <div className="modal-backdrop z-[55]" onClick={()=>setShowExpensesModal(false)}>
           <div className="modal-content z-[55]" onClick={(e)=>e.stopPropagation()}>
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-auto animate-scale-in p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-slate-900">Buscar y filtrar gastos</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full mx-auto animate-scale-in p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100">Filtrar gastos</h3>
                 <button className="btn-secondary py-2" onClick={()=>setShowExpensesModal(false)}>
                   <X className="w-4 h-4" />
                 </button>
               </div>
               
               {/* Filtros de búsqueda */}
-              <div className="bg-slate-50 rounded-xl p-4 mb-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl p-4 mb-4 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="relative">
-                    <label className="block text-xs font-medium text-slate-700 mb-2">Buscar</label>
+                    <label className="block text-xs font-semibold text-slate-800 dark:text-gray-200 mb-1">Buscar</label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                       <input 
@@ -348,18 +348,18 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                         placeholder="Buscar por descripción..." 
                         value={searchTerm} 
                         onChange={(e)=>setSearchTerm(e.target.value)} 
-                        className="w-full pl-10 pr-4 py-3 h-12 text-[15px] bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 placeholder-slate-400" 
+                        className="w-full pl-10 pr-4 py-2 h-10 text-sm bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 placeholder-slate-500 dark:placeholder-gray-400 text-slate-900 dark:text-gray-100" 
                       />
                     </div>
                   </div>
                   <div className="relative">
-                    <label className="block text-xs font-medium text-slate-700 mb-2">Categoría</label>
+                    <label className="block text-xs font-semibold text-slate-800 dark:text-gray-200 mb-1">Categoría</label>
                     <div className="relative">
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <select 
                         value={selectedCategory} 
                         onChange={(e)=>setSelectedCategory(e.target.value)} 
-                        className="w-full pl-9 pr-10 py-3 h-12 text-[15px] bg-white border border-slate-300 rounded-xl shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                        className="w-full pl-9 pr-10 py-2 h-10 text-sm bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-slate-900 dark:text-gray-100"
                       >
                         <option value="all">Todas las categorías</option>
                         {Object.entries(categories).map(([key, category]) => (
@@ -375,13 +375,13 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                     </div>
                   </div>
                   <div className="relative">
-                    <label className="block text-xs font-medium text-slate-700 mb-2">Fecha</label>
+                    <label className="block text-xs font-semibold text-slate-800 dark:text-gray-200 mb-1">Fecha</label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <select 
                         value={dateFilter} 
                         onChange={(e)=>setDateFilter(e.target.value)} 
-                        className="w-full pl-9 pr-10 py-3 h-12 text-[15px] bg-white border border-slate-300 rounded-xl shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                        className="w-full pl-9 pr-10 py-2 h-10 text-sm bg-slate-50 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-slate-900 dark:text-gray-100"
                       >
                         <option value="all">Todas las fechas</option>
                         <option value="today">Hoy</option>
@@ -399,10 +399,17 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                 </div>
                 
                 {/* Resumen de filtros */}
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-slate-600">
-                    Mostrando {filteredExpenses.length} de {expenses.length} gastos
-                  </span>
+                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-600 flex items-center justify-between text-sm">
+                  <div className="flex items-center space-x-3">
+                    <span className="font-medium text-slate-800 dark:text-gray-200">
+                      {filteredExpenses.length} gastos
+                    </span>
+                    {expenses.length !== filteredExpenses.length && (
+                      <span className="text-slate-500 dark:text-gray-400">
+                        de {expenses.length} totales
+                      </span>
+                    )}
+                  </div>
                   {(searchTerm || selectedCategory !== 'all' || dateFilter !== 'all') && (
                     <button 
                       onClick={() => {
@@ -411,7 +418,7 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                         setDateFilter('all')
                         setCurrentPage(1)
                       }}
-                      className="text-indigo-600 hover:text-indigo-700 font-medium"
+                      className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium text-xs bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-md transition-colors"
                     >
                       Limpiar filtros
                     </button>

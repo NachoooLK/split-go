@@ -282,8 +282,8 @@ function AddExpenseModal({ categories, group, onAdd, onUpdate, onClose, suggestC
   return (
     <>
       <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal-content pb-safe overflow-x-hidden" onClick={e => e.stopPropagation()}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full mx-auto animate-scale-in flex flex-col overflow-x-hidden" style={{ maxHeight: '75vh' }}>
+        <div className="modal-content pb-safe overflow-x-hidden flex items-start pt-4 pb-8" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full mx-auto animate-scale-in flex flex-col overflow-x-hidden" style={{ maxHeight: '65vh' }}>
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-gray-700 flex-shrink-0">
             <h2 className="text-lg font-bold text-slate-900 dark:text-gray-100">
@@ -657,7 +657,7 @@ function AddExpenseModal({ categories, group, onAdd, onUpdate, onClose, suggestC
           </div>
           
           {/* Footer fijo con botones */}
-          <div className="p-4 border-t border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 rounded-b-2xl">
+          <div className="px-4 pt-4 pb-6 border-t border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 rounded-b-2xl">
             {/* Estado de validación en división detallada - compacto */}
             {group && useDetailedSplit && extractedItems.length > 0 && (
               <div className="mb-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">

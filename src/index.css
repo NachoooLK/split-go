@@ -146,7 +146,9 @@
   }
   
   .modal-content {
-    @apply fixed inset-0 z-50 flex items-center justify-center p-4 overflow-x-hidden;
+    @apply fixed inset-0 z-50 flex items-center justify-center px-4 overflow-x-hidden;
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
   /* Ensure modal inner card scrolls on small screens */
