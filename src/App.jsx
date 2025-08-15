@@ -143,10 +143,14 @@ function App({ user, logout }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <span className="text-xl">💰</span>
+              <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/SplitHive sin fondo.png" 
+                  alt="SplitHive Logo" 
+                  className="w-11 h-11 object-contain"
+                />
               </div>
-              <h1 className="text-2xl font-bold text-gradient dark:text-white">SplitGo</h1>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">SplitHive</h1>
             </div>
             <div className="flex items-center space-x-3">
               <span className="text-sm text-slate-600 dark:text-gray-300 hidden sm:inline">{user?.email || user?.displayName}</span>
@@ -211,10 +215,10 @@ function App({ user, logout }) {
       >
         {activeTab === 'personal' && (
           <PersonalView
-            expenses={(function(){ const u = getUnifiedExpenses(); return u; })()}
+            expenses={personalExpenses}
             categories={CATEGORIES}
             stats={(function(){
-              const list = getUnifiedExpenses()
+              const list = personalExpenses
               const now = new Date()
               const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
               const total = list.reduce((s, e) => s + (Number(e.amount) || 0), 0)

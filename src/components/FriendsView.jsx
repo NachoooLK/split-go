@@ -122,9 +122,9 @@ function FriendsView({ user, formatCurrency, showToast }) {
                     title="Compartir"
                     onClick={async ()=>{
                       const link = `${window.location.origin}/?invite=${user?.uid}`
-                      const text = `Agrega mi ID en SplitGo: ${user?.uid}\n${link}`
+                      const text = `Agrega mi ID en SplitHive: ${user?.uid}\n${link}`
                       if (navigator.share) {
-                        try { await navigator.share({ title: 'Mi ID de SplitGo', text, url: link }) } catch {}
+                        try { await navigator.share({ title: 'Mi ID de SplitHive', text, url: link }) } catch {}
                       } else {
                         await navigator.clipboard.writeText(text)
                         showToast && showToast('Texto copiado para compartir')

@@ -17,8 +17,8 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
 
   // Filtros combinados
   const filteredExpenses = useMemo(() => {
-    // Primero filtrar solo gastos personales (excluir los de grupo)
-    let filtered = expenses.filter(expense => expense.source !== 'groupShare')
+    // Ya solo recibimos gastos personales, no necesitamos filtrar por source
+    let filtered = expenses
 
     // Filtro de búsqueda
     if (searchTerm) {

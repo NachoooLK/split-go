@@ -600,6 +600,11 @@ export function useAppState(user) {
     return candidates.includes(n)
   }
 
+  // Función para obtener solo gastos personales (sin gastos de grupo)
+  const getPersonalExpensesOnly = () => {
+    return personalExpenses.sort((a, b) => (b.date?.getTime?.() || 0) - (a.date?.getTime?.() || 0))
+  }
+
   // Combina gastos personales con tu parte proporcional de los gastos de grupo
   const getUnifiedExpenses = () => {
     const unified = [...personalExpenses]
@@ -920,6 +925,7 @@ export function useAppState(user) {
     getChartData,
     suggestCategory,
     detectRecurringExpenses,
+    getPersonalExpensesOnly,
     getUnifiedExpenses,
     getReceivablesSummary,
     getPayablesSummary,

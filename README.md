@@ -1,4 +1,4 @@
-## split-go
+## SplitHive
 
 Aplicación de gestión de gastos personales y grupales.
 

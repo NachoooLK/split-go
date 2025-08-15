@@ -46,8 +46,12 @@ function AuthGate({ children }) {
       <div className="h-full flex items-center justify-center p-4">
         <div className="card p-8 max-w-md w-full text-center space-y-6">
           <div>
-            <div className="w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl mx-auto mb-3 flex items-center justify-center">
-              <span className="text-2xl">💰</span>
+            <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl mx-auto mb-3 flex items-center justify-center overflow-hidden">
+              <img 
+                src="/SplitHive sin fondo.png" 
+                alt="SplitHive Logo" 
+                className="w-14 h-14 object-contain"
+              />
             </div>
             <h1 className="text-2xl font-bold text-slate-900">Inicia sesión</h1>
             <p className="text-slate-600">Accede para guardar tus gastos en tu cuenta</p>
