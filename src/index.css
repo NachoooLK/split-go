@@ -60,38 +60,37 @@
     @apply text-slate-900 dark:text-gray-100 dark:bg-gray-900 transition-colors duration-200;
   }
 
-/* iOS safe-area padding for bottom nav */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/* Asegurar que la navegación móvil siempre sea visible en móviles */
-@media (max-width: 640px) {
-  .mobile-nav-always-visible {
-    display: block !important;
+  /* iOS safe-area padding for bottom nav */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-}
 
-/* Mejoras de responsividad para componentes específicos */
-@media (max-width: 640px) {
-  .card {
-    @apply rounded-xl;
+  /* Asegurar que la navegación móvil siempre sea visible en móviles */
+  @media (max-width: 640px) {
+    .mobile-nav-always-visible {
+      display: block !important;
+    }
   }
-  
-  .btn-primary, .btn-secondary {
-    @apply px-4 py-2.5 text-sm;
+
+  /* Mejoras de responsividad para componentes específicos */
+  @media (max-width: 640px) {
+    .card {
+      @apply rounded-xl;
+    }
+    
+    .btn-primary, .btn-secondary {
+      @apply px-4 py-2.5 text-sm;
+    }
   }
-}
 
-/* Mejoras para modo oscuro en componentes específicos */
-.dark .card {
-  @apply bg-gray-800 border-gray-700;
-}
+  /* Mejoras para modo oscuro en componentes específicos */
+  .dark .card {
+    @apply bg-gray-800 border-gray-700;
+  }
 
-
-
-.dark .btn-secondary {
-  @apply bg-gray-800 border-gray-600 text-gray-200 hover:border-gray-500;
+  .dark .btn-secondary {
+    @apply bg-gray-800 border-gray-600 text-gray-200 hover:border-gray-500;
+  }
 }
 
 @layer components {
