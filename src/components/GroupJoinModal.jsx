@@ -81,7 +81,7 @@ function GroupJoinModal({ groupData, inviteToken, generalToken, onJoin, onClose,
   if (isExpired) {
     return (
       <div className="modal-backdrop">
-        <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-content overflow-x-hidden" onClick={e => e.stopPropagation()}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-auto animate-scale-in">
             <div className="p-6 text-center">
               <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -106,7 +106,7 @@ function GroupJoinModal({ groupData, inviteToken, generalToken, onJoin, onClose,
   if (isAlreadyClaimed) {
     return (
       <div className="modal-backdrop">
-        <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-content overflow-x-hidden" onClick={e => e.stopPropagation()}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-auto animate-scale-in">
             <div className="p-6 text-center">
               <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-4">

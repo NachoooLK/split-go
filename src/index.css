@@ -146,13 +146,14 @@
   }
   
   .modal-content {
-    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4 overflow-x-hidden;
   }
 
   /* Ensure modal inner card scrolls on small screens */
   .modal-content > div {
     max-height: calc(100vh - 2rem);
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   
   .toast {
@@ -206,5 +207,18 @@
 
   .animate-scale-in {
     animation: scale-in 0.3s ease-out;
+  }
+
+  /* Prevenir scroll horizontal en cualquier elemento */
+  *, *::before, *::after {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  /* Asegurar que las imágenes no causen overflow */
+  img {
+    max-width: 100%;
+    height: auto;
   }
 }

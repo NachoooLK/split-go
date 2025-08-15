@@ -513,8 +513,8 @@ function AddGroupModal({ onAdd, onClose, user }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full mx-auto animate-scale-in">
+      <div className="modal-content overflow-x-hidden" onClick={e => e.stopPropagation()}>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full mx-auto animate-scale-in overflow-x-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-gray-700">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Nuevo grupo</h2>

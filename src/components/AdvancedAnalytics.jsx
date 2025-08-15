@@ -479,7 +479,7 @@ function AdvancedAnalytics({ expenses, categories, className = '', formatCurrenc
           <Zap className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-indigo-600 flex-shrink-0" />
           <span className="truncate">Análisis Visual</span>
         </h3>
-        <div className="overflow-x-auto">
+        <div className="w-full overflow-hidden">
           {renderChart()}
         </div>
       </div>

@@ -282,8 +282,8 @@ function AddExpenseModal({ categories, group, onAdd, onUpdate, onClose, suggestC
   return (
     <>
       <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal-content pb-safe" onClick={e => e.stopPropagation()}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full mx-auto animate-scale-in flex flex-col" style={{ maxHeight: '85vh' }}>
+        <div className="modal-content pb-safe overflow-x-hidden" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full mx-auto animate-scale-in flex flex-col overflow-x-hidden" style={{ maxHeight: '75vh' }}>
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-gray-700 flex-shrink-0">
             <h2 className="text-lg font-bold text-slate-900 dark:text-gray-100">
@@ -298,8 +298,8 @@ function AddExpenseModal({ categories, group, onAdd, onUpdate, onClose, suggestC
           </div>
 
           {/* Form */}
-          <div className="flex-1 overflow-y-auto" style={{ minHeight: '0' }}>
-            <form id="expense-form" onSubmit={handleSubmit} className="p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden" style={{ minHeight: '0' }}>
+            <form id="expense-form" onSubmit={handleSubmit} className="p-4 space-y-4 overflow-x-hidden">
             {/* Ticket Scanner Button */}
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-3 border border-indigo-200 dark:border-indigo-700">
               <div className="flex items-center justify-between">
@@ -568,7 +568,7 @@ function AddExpenseModal({ categories, group, onAdd, onUpdate, onClose, suggestC
                               </button>
                             </div>
                             
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-wrap gap-1 overflow-x-hidden">
                               {getAllAvailableMembers(group).map(member => {
                                 const isAssigned = itemAssignments[index]?.includes(member)
                                 return (

@@ -625,7 +625,7 @@ function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupB
 
       {/* Estadísticas del grupo - Mis gastos y totales */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 p-4">
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 text-sm">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 text-sm overflow-x-hidden">
           <div className="flex items-center space-x-2">
             <div className="w-6 h-6 rounded bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
               <DollarSign className="w-3 h-3 text-white" />

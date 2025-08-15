@@ -49,7 +49,7 @@ function MobileNav({
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-slate-200 dark:border-gray-700 z-50 sm:hidden mobile-nav-always-visible transition-colors duration-200" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-      <div className="max-w-7xl mx-auto grid grid-cols-5 py-2">
+      <div className="max-w-7xl mx-auto grid grid-cols-5 py-2 overflow-x-hidden">
         <Item tab="personal" label={labels.personal} Icon={User} />
         <Item tab="groups" label={labels.groups} Icon={Users} />
         

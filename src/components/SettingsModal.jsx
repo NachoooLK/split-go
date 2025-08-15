@@ -42,8 +42,8 @@ function SettingsModal({ open, onClose, settings, onSave, currencies = ['EUR','U
   const languageOptions = useMemo(() => LANG_OPTIONS.filter(o => languageCodes.includes(o.code)), [])
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-auto animate-scale-in transition-colors duration-200">
+      <div className="modal-content overflow-x-hidden" onClick={e => e.stopPropagation()}>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-auto animate-scale-in transition-colors duration-200 overflow-x-hidden">
           <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-gray-700">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Ajustes</h2>
             <button onClick={onClose} className="btn-secondary py-2">Cerrar</button>
