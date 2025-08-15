@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup-cors": "node setup-cors.js",
+    "firebase-deploy": "firebase deploy",
+    "firebase-deploy-storage": "firebase deploy --only storage"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -17,7 +20,8 @@
     "qrcode.react": "^4.2.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

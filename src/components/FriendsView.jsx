@@ -55,16 +55,16 @@ function FriendsView({ user, formatCurrency, showToast }) {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Amigos</h1>
-          <p className="text-slate-600">Añade amigos por su ID y gestiona solicitudes y reclamaciones</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-gray-100">Amigos</h1>
+          <p className="text-slate-600 dark:text-gray-400">Añade amigos por su ID y gestiona solicitudes y reclamaciones</p>
         </div>
       </div>
 
       {/* Añadir amigo */}
       <div className="card p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-slate-900 flex items-center">
-            <UserPlus className="w-5 h-5 mr-2 text-indigo-600"/>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 flex items-center">
+            <UserPlus className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400"/>
             Agregar amigo por ID
           </h3>
         </div>
@@ -99,12 +99,12 @@ function FriendsView({ user, formatCurrency, showToast }) {
           </div>
 
           {/* Tu ID */}
-          <div className="bg-slate-50 rounded-xl p-4">
+          <div className="bg-slate-50 dark:bg-gray-700 rounded-xl p-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Tu ID:</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">Tu ID:</label>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm flex-1 break-all">
+                  <span className="font-mono bg-white dark:bg-gray-800 text-slate-900 dark:text-gray-100 px-3 py-2 rounded-lg border border-slate-200 dark:border-gray-600 text-sm flex-1 break-all">
                     {user?.uid}
                   </span>
                   <button
@@ -115,7 +115,7 @@ function FriendsView({ user, formatCurrency, showToast }) {
                       showToast && showToast('ID copiado'); 
                     }}
                   >
-                    <Copy className="w-4 h-4 text-slate-600" />
+                    <Copy className="w-4 h-4 text-slate-600 dark:text-gray-400" />
                   </button>
                   <button
                     className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -131,17 +131,17 @@ function FriendsView({ user, formatCurrency, showToast }) {
                       }
                     }}
                   >
-                    <Share2 className="w-4 h-4 text-slate-600" />
+                    <Share2 className="w-4 h-4 text-slate-600 dark:text-gray-400" />
                   </button>
                 </div>
               </div>
 
               {/* QR Code */}
               <div className="flex flex-col items-center sm:items-end">
-                <label className="block text-sm font-medium text-slate-700 mb-2 self-start sm:self-center">Código QR:</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2 self-start sm:self-center">Código QR:</label>
                 <button
                   aria-label="Mostrar código QR"
-                  className="rounded-lg border-2 border-slate-200 hover:border-indigo-300 hover:shadow-md active:scale-[0.98] transition-all duration-200 bg-white p-2"
+                  className="rounded-lg border-2 border-slate-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md active:scale-[0.98] transition-all duration-200 bg-white dark:bg-gray-800 p-2"
                   title="Toca para ampliar"
                   onClick={()=>document.getElementById('qr-modal')?.showModal()}
                 >
@@ -154,17 +154,17 @@ function FriendsView({ user, formatCurrency, showToast }) {
                     fgColor="#111827" 
                   />
                 </button>
-                <span className="text-xs text-slate-500 mt-1 text-center">Toca para ampliar</span>
+                <span className="text-xs text-slate-500 dark:text-gray-400 mt-1 text-center">Toca para ampliar</span>
               </div>
             </div>
           </div>
         </div>
 
         <dialog id="qr-modal" className="rounded-2xl backdrop:bg-black/20 backdrop:backdrop-blur-sm">
-          <div className="p-6 bg-white rounded-2xl shadow-2xl max-w-sm mx-auto">
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm mx-auto">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Mi código QR</h3>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 inline-block">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-4">Mi código QR</h3>
+              <div className="bg-white dark:bg-gray-100 p-4 rounded-xl border border-slate-200 dark:border-gray-600 inline-block">
                 <QRCodeCanvas 
                   value={(typeof window !== 'undefined' && user?.uid) ? `${window.location.origin}/?invite=${user.uid}` : (user?.uid || '')} 
                   size={200} 
@@ -174,10 +174,10 @@ function FriendsView({ user, formatCurrency, showToast }) {
                   fgColor="#111827" 
                 />
               </div>
-              <div className="mt-4 text-sm text-slate-600">
+              <div className="mt-4 text-sm text-slate-600 dark:text-gray-400">
                 Comparte este código para que te añadan como amigo
               </div>
-              <div className="mt-4 text-xs text-slate-500 bg-slate-50 rounded-lg p-3">
+              <div className="mt-4 text-xs text-slate-500 dark:text-gray-400 bg-slate-50 dark:bg-gray-700 rounded-lg p-3">
                 <div className="font-mono break-all">{user?.uid}</div>
               </div>
               <div className="mt-6">
@@ -196,7 +196,7 @@ function FriendsView({ user, formatCurrency, showToast }) {
       {/* Solicitudes entrantes */}
       {friendRequests.length > 0 && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-4 flex items-center">
             <Users className="w-5 h-5 mr-2 text-emerald-600"/>
             Solicitudes recibidas
             <span className="ml-2 bg-emerald-100 text-emerald-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -205,10 +205,10 @@ function FriendsView({ user, formatCurrency, showToast }) {
           </h3>
           <div className="space-y-3">
             {friendRequests.map(r => (
-              <div key={r.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <div key={r.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-700 rounded-lg">
                 <div className="flex-1">
-                  <div className="font-medium text-slate-900">{r.fromName || r.fromUid}</div>
-                  <div className="text-xs text-slate-500 font-mono">{r.fromUid}</div>
+                  <div className="font-medium text-slate-900 dark:text-gray-100">{r.fromName || r.fromUid}</div>
+                  <div className="text-xs text-slate-500 dark:text-gray-400 font-mono">{r.fromUid}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -220,7 +220,7 @@ function FriendsView({ user, formatCurrency, showToast }) {
                   </button>
                   <button 
                     onClick={()=>rejectFriendRequest(r.id, r.fromUid)} 
-                    className="px-3 py-2 bg-slate-300 text-slate-700 rounded-lg hover:bg-slate-400 transition-colors"
+                    className="px-3 py-2 bg-slate-300 dark:bg-gray-600 text-slate-700 dark:text-gray-200 rounded-lg hover:bg-slate-400 dark:hover:bg-gray-500 transition-colors"
                     title="Rechazar"
                   >
                     <MailX className="w-4 h-4"/>
@@ -245,17 +245,17 @@ function FriendsView({ user, formatCurrency, showToast }) {
         </h3>
         {friends.length === 0 ? (
           <div className="text-center py-8">
-            <Users className="w-12 h-12 text-slate-300 mx-auto mb-4"/>
-            <p className="text-slate-600 mb-2">Aún no tienes amigos añadidos</p>
-            <p className="text-sm text-slate-500">Envía solicitudes usando sus IDs para empezar</p>
+            <Users className="w-12 h-12 text-slate-300 dark:text-gray-600 mx-auto mb-4"/>
+            <p className="text-slate-600 dark:text-gray-400 mb-2">Aún no tienes amigos añadidos</p>
+            <p className="text-sm text-slate-500 dark:text-gray-500">Envía solicitudes usando sus IDs para empezar</p>
           </div>
         ) : (
           <div className="space-y-3">
             {friends.map(f => (
-              <div key={f.uid} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <div key={f.uid} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-700 rounded-lg">
                 <div className="flex-1">
-                  <div className="font-medium text-slate-900">{f.username || f.displayName || f.uid}</div>
-                  <div className="text-xs text-slate-500 font-mono">{f.uid}</div>
+                  <div className="font-medium text-slate-900 dark:text-gray-100">{f.username || f.displayName || f.uid}</div>
+                  <div className="text-xs text-slate-500 dark:text-gray-400 font-mono">{f.uid}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -290,14 +290,14 @@ function FriendsView({ user, formatCurrency, showToast }) {
         {claims.length > 0 && (
           <div className="mt-6 space-y-3">
             {claims.map(c => (
-              <div key={c.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+              <div key={c.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-700 rounded-xl">
                 <div>
-                  <div className="font-medium text-slate-900">{c.fromUid === user.uid ? 'Tú reclamas a' : 'Te reclama'} {(() => {
+                  <div className="font-medium text-slate-900 dark:text-gray-100">{c.fromUid === user.uid ? 'Tú reclamas a' : 'Te reclama'} {(() => {
                     const otherUid = c.fromUid === user.uid ? c.toUid : c.fromUid
                     const other = friends.find(fr => fr.uid === otherUid)
                     return other?.username || other?.displayName || otherUid
                   })()}</div>
-                  <div className="text-sm text-slate-600">{c.description || 'Sin descripción'}</div>
+                  <div className="text-sm text-slate-600 dark:text-gray-400">{c.description || 'Sin descripción'}</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="font-bold">{formatCurrency ? formatCurrency(c.amount) : `€${Number(c.amount).toFixed(2)}`}</div>

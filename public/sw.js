@@ -12,7 +12,17 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+      .then((cache) => {
+        // Cachear recursos uno por uno para manejar errores
+        return Promise.allSettled(
+          urlsToCache.map(url => 
+            cache.add(url).catch(err => {
+              console.warn('Failed to cache:', url, err);
+              return null;
+            })
+          )
+        );
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -37,6 +47,16 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Ignorar requests a Firebase Storage para evitar problemas de CORS
+  if (url.hostname.includes('firebasestorage.googleapis.com')) {
+    return; // No interceptar estas requests
+  }
+
+  // Ignorar requests de extensiones del navegador
+  if (url.protocol === 'chrome-extension:' || url.protocol === 'moz-extension:') {
+    return;
+  }
+
   // Estrategia Cache First para assets estáticos
   if (request.destination === 'script' || 
       request.destination === 'style' || 
@@ -44,12 +64,16 @@ self.addEventListener('fetch', (event) => {
       url.pathname.includes('.')) {
     event.respondWith(
       caches.match(request).then((response) => {
-        return response || fetch(request);
+        return response || fetch(request).catch(() => {
+          console.warn('Failed to fetch resource:', request.url);
+          return new Response('Resource not available', { status: 404 });
+        });
       })
     );
   } 
-  // Estrategia Network First para datos de Firebase
-  else {
+  // Estrategia Network First para datos de Firebase (excepto Storage)
+  else if (url.hostname.includes('firestore.googleapis.com') || 
+           url.hostname.includes('identitytoolkit.googleapis.com')) {
     event.respondWith(
       fetch(request).catch(() => {
         return caches.match(request);

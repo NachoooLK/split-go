@@ -25,10 +25,7 @@ export function useAppState(user) {
   const [groupInvites, setGroupInvites] = useState([])
   const [recurringPayments, setRecurringPayments] = useState([])
   
-  const [budgets, setBudgets] = useState({
-    food: { amount: 300, period: 'monthly', createdAt: new Date() },
-    transport: { amount: 100, period: 'monthly', createdAt: new Date() }
-  })
+
 
   const addPersonalExpense = async (expense) => {
     const payload = {
@@ -61,15 +58,206 @@ export function useAppState(user) {
         username = snap.data().username || snap.data().displayName || username
       }
     } catch {}
+    
+    // Support for new slot-based system or legacy members array
+    const membersList = group.memberSlots 
+      ? group.memberSlots.filter(slot => slot.type === 'friend' && slot.friendUid)
+          .map(slot => slot.name)
+      : group.members || [username]
+    
+    const membersUidsList = group.memberSlots
+      ? group.memberSlots.filter(slot => slot.type === 'friend' && slot.friendUid)
+          .map(slot => slot.friendUid)
+      : [user.uid]
+    
+    // Always include creator
+    if (!membersList.includes(username)) {
+      membersList.unshift(username)
+    }
+    if (!membersUidsList.includes(user.uid)) {
+      membersUidsList.unshift(user.uid)
+    }
+
     const docRef = await addDoc(collection(db, 'groups'), {
       name: group.name,
-      members: group.members || [username],
-      membersUids: [user.uid],
+      members: membersList,
+      membersUids: membersUidsList,
+      memberSlots: group.memberSlots || [],
+      totalMembers: group.totalMembers || membersList.length,
+      generalInviteToken: group.generalInviteToken,
       createdBy: user.uid,
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      inviteLinks: group.memberSlots?.filter(slot => slot.type === 'pending')
+        .map(slot => ({
+          slotId: slot.id,
+          token: slot.inviteToken,
+          name: slot.name,
+          inviteType: slot.inviteType || 'specific',
+          expiresAt: slot.expiresAt,
+          status: 'active'
+        })) || []
     })
+    
+    // Send friend invitations for friend slots
+    const friendInvites = group.memberSlots?.filter(slot => slot.type === 'friend' && slot.friendUid) || []
+    for (const slot of friendInvites) {
+      try {
+        await addDoc(collection(db, 'groupInvites'), {
+          groupId: docRef.id,
+          groupName: group.name,
+          inviterUid: user.uid,
+          inviterName: username,
+          inviteeUid: slot.friendUid,
+          slotId: slot.id,
+          createdAt: serverTimestamp(),
+          status: 'pending'
+        })
+      } catch (error) {
+        console.error('Error sending friend invitation:', error)
+      }
+    }
+    
     return docRef.id
   }
+
+  // Unirse por enlace específico (para una persona concreta)
+  const joinGroupBySpecificLink = async (joinData) => {
+    const { groupId, slotId, userUid, userName, inviteToken } = joinData
+    
+    try {
+      const groupRef = doc(db, 'groups', groupId)
+      const groupDoc = await getDoc(groupRef)
+      
+      if (!groupDoc.exists()) {
+        throw new Error('Grupo no encontrado')
+      }
+      
+      const group = groupDoc.data()
+      
+      // Find and verify the slot
+      const targetSlot = group.memberSlots?.find(slot => 
+        slot.id === slotId && 
+        slot.inviteToken === inviteToken && 
+        slot.status === 'unclaimed' &&
+        slot.inviteType === 'specific' &&
+        new Date(slot.expiresAt?.toDate?.() || slot.expiresAt) > new Date()
+      )
+      
+      if (!targetSlot) {
+        throw new Error('Enlace inválido o expirado')
+      }
+      
+      // Update the slot as claimed
+      const updatedSlots = group.memberSlots.map(slot => {
+        if (slot.id === slotId) {
+          return {
+            ...slot,
+            status: 'claimed',
+            claimedBy: userUid,
+            claimedAt: serverTimestamp(),
+            actualName: userName
+          }
+        }
+        return slot
+      })
+      
+      // Add user to members lists
+      const updatedMembers = [...(group.members || [])]
+      const updatedMembersUids = [...(group.membersUids || [])]
+      
+      if (!updatedMembers.includes(targetSlot.name)) {
+        updatedMembers.push(targetSlot.name)
+      }
+      if (!updatedMembersUids.includes(userUid)) {
+        updatedMembersUids.push(userUid)
+      }
+      
+      await updateDoc(groupRef, {
+        memberSlots: updatedSlots,
+        members: updatedMembers,
+        membersUids: updatedMembersUids,
+        updatedAt: serverTimestamp()
+      })
+      
+      return { success: true, groupId, slotName: targetSlot.name }
+    } catch (error) {
+      console.error('Error joining group:', error)
+      throw error
+    }
+  }
+
+  // Unirse por enlace general (elegir entre slots disponibles)
+  const joinGroupByGeneralLink = async (joinData) => {
+    const { groupId, slotId, userUid, userName, generalToken } = joinData
+    
+    try {
+      const groupRef = doc(db, 'groups', groupId)
+      const groupDoc = await getDoc(groupRef)
+      
+      if (!groupDoc.exists()) {
+        throw new Error('Grupo no encontrado')
+      }
+      
+      const group = groupDoc.data()
+      
+      // Verify general token
+      if (group.generalInviteToken !== generalToken) {
+        throw new Error('Enlace inválido')
+      }
+      
+      // Find and verify the selected slot
+      const targetSlot = group.memberSlots?.find(slot => 
+        slot.id === slotId && 
+        slot.status === 'unclaimed' &&
+        slot.inviteType === 'general'
+      )
+      
+      if (!targetSlot) {
+        throw new Error('Slot no disponible')
+      }
+      
+      // Update the slot as claimed
+      const updatedSlots = group.memberSlots.map(slot => {
+        if (slot.id === slotId) {
+          return {
+            ...slot,
+            status: 'claimed',
+            claimedBy: userUid,
+            claimedAt: serverTimestamp(),
+            actualName: userName,
+            name: userName // Update the slot name to the user's chosen name
+          }
+        }
+        return slot
+      })
+      
+      // Add user to members lists
+      const updatedMembers = [...(group.members || [])]
+      const updatedMembersUids = [...(group.membersUids || [])]
+      
+      if (!updatedMembers.includes(userName)) {
+        updatedMembers.push(userName)
+      }
+      if (!updatedMembersUids.includes(userUid)) {
+        updatedMembersUids.push(userUid)
+      }
+      
+      await updateDoc(groupRef, {
+        memberSlots: updatedSlots,
+        members: updatedMembers,
+        membersUids: updatedMembersUids,
+        updatedAt: serverTimestamp()
+      })
+      
+      return { success: true, groupId, chosenName: userName }
+    } catch (error) {
+      console.error('Error joining group:', error)
+      throw error
+    }
+  }
+
+  // Función legacy mantenida para compatibilidad
+  const joinGroupByInviteLink = joinGroupBySpecificLink
 
   const addGroupExpense = async (groupId, expense) => {
     const payload = {
@@ -80,7 +268,13 @@ export function useAppState(user) {
       splitBetween: expense.splitBetween,
       settledBy: expense.settledBy || [],
       date: Timestamp.fromDate(new Date(expense.date)),
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      // Agregar campos de división detallada si existen
+      ...(expense.useDetailedSplit && {
+        useDetailedSplit: expense.useDetailedSplit,
+        items: expense.items || [],
+        itemAssignments: expense.itemAssignments || {}
+      })
     }
 
     await addDoc(collection(db, 'groups', groupId, 'expenses'), payload)
@@ -152,6 +346,7 @@ export function useAppState(user) {
           id: g.id,
           name: g.name,
           members: g.members || [],
+          memberSlots: g.memberSlots || [], // AÑADIDO: incluir memberSlots
           expenses: [],
           createdAt: g.createdAt?.toDate ? g.createdAt.toDate() : new Date()
         })))
@@ -172,7 +367,11 @@ export function useAppState(user) {
                   splitBetween: e.splitBetween || [],
                   settledBy: e.settledBy || [],
                   date: e.date?.toDate ? e.date.toDate() : new Date(),
-                  createdAt: e.createdAt?.toDate ? e.createdAt.toDate() : new Date()
+                  createdAt: e.createdAt?.toDate ? e.createdAt.toDate() : new Date(),
+                  // Incluir campos de división detallada
+                  useDetailedSplit: e.useDetailedSplit || false,
+                  items: e.items || [],
+                  itemAssignments: e.itemAssignments || {}
                 }
               })
 
@@ -183,6 +382,7 @@ export function useAppState(user) {
                   id: g.id,
                   name: g.name,
                   members: g.members || [],
+                  memberSlots: g.memberSlots || [], // AÑADIDO: incluir memberSlots
                   createdAt: g.createdAt?.toDate ? g.createdAt.toDate() : new Date(),
                 }
                 byId.set(g.id, { ...base, expenses })
@@ -235,18 +435,7 @@ export function useAppState(user) {
     }
   }, [user?.uid])
 
-  // Invitaciones a grupos
-  const inviteUserToGroup = async (targetUid, groupId) => {
-    // Validaciones básicas para evitar paths inválidos
-    if (!targetUid || typeof targetUid !== 'string' || !targetUid.trim()) return
-    if (user && targetUid === user.uid) return
-    const groupDoc = doc(db, 'groups', groupId)
-    await addDoc(collection(db, 'users', targetUid.trim(), 'groupInvites'), {
-      groupId,
-      inviterUid: user.uid,
-      createdAt: serverTimestamp()
-    })
-  }
+
 
   const acceptGroupInvite = async (inviteId, groupId) => {
     let username = user.displayName || 'Miembro'
@@ -279,17 +468,18 @@ export function useAppState(user) {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     
-    const total = personalExpenses.reduce((sum, expense) => sum + expense.amount, 0)
-    const monthlyExpenses = personalExpenses.filter(expense => 
+    const validExpenses = personalExpenses.filter(expense => expense.amount > 0)
+    const total = validExpenses.reduce((sum, expense) => sum + expense.amount, 0)
+    const monthlyExpenses = validExpenses.filter(expense => 
       expense.date >= startOfMonth
     )
     const monthlyTotal = monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0)
-    const average = personalExpenses.length > 0 ? total / personalExpenses.length : 0
+    const average = validExpenses.length > 0 ? total / validExpenses.length : 0
     
     return {
       total: total.toFixed(2),
       monthly: monthlyTotal.toFixed(2),
-      count: personalExpenses.length,
+      count: validExpenses.length,
       average: average.toFixed(2)
     }
   }
@@ -305,25 +495,51 @@ export function useAppState(user) {
       balances[member] = 0
     })
     
-    // Calcular balances por cada gasto
-    group.expenses.forEach(expense => {
-      const sharePerPerson = expense.amount / expense.splitBetween.length
-      
+    // Calcular balances por cada gasto (ignorar gastos con coste 0)
+    group.expenses.filter(expense => expense.amount > 0).forEach(expense => {
       // El que pagó recibe crédito
       balances[expense.paidBy] += expense.amount
       
-      // Los que participan deben su parte
-      expense.splitBetween.forEach(member => {
-        balances[member] -= sharePerPerson
-      })
+      if (expense.useDetailedSplit && expense.items && expense.itemAssignments) {
+        // División detallada: calcular basado en items específicos
+        expense.items.forEach((item, index) => {
+          const assignedMembers = expense.itemAssignments[index] || []
+          if (assignedMembers.length > 0) {
+            const sharePerMember = item.price / assignedMembers.length
+            assignedMembers.forEach(member => {
+              balances[member] -= sharePerMember
+            })
+          }
+        })
+      } else {
+        // División rápida tradicional
+        const sharePerPerson = expense.amount / expense.splitBetween.length
+        expense.splitBetween.forEach(member => {
+          balances[member] -= sharePerPerson
+        })
+      }
 
       // Ajustar por partes ya saldadas
       const settled = Array.isArray(expense.settledBy) ? expense.settledBy : []
       settled.forEach(member => {
-        // Si ya estaba incluido en splitBetween, revertimos su deuda y reducimos el crédito del pagador
-        if (expense.splitBetween.includes(member)) {
-          balances[member] += sharePerPerson
-          balances[expense.paidBy] -= sharePerPerson
+        if (expense.useDetailedSplit && expense.items && expense.itemAssignments) {
+          // Para división detallada, calcular qué cantidad debe este miembro
+          let memberDebt = 0
+          expense.items.forEach((item, index) => {
+            const assignedMembers = expense.itemAssignments[index] || []
+            if (assignedMembers.includes(member)) {
+              memberDebt += item.price / assignedMembers.length
+            }
+          })
+          balances[member] += memberDebt
+          balances[expense.paidBy] -= memberDebt
+        } else {
+          // División rápida tradicional
+          const sharePerPerson = expense.amount / expense.splitBetween.length
+          if (expense.splitBetween.includes(member)) {
+            balances[member] += sharePerPerson
+            balances[expense.paidBy] -= sharePerPerson
+          }
         }
       })
     })
@@ -388,7 +604,7 @@ export function useAppState(user) {
   const getUnifiedExpenses = () => {
     const unified = [...personalExpenses]
     for (const g of groups) {
-      for (const e of g.expenses) {
+      for (const e of g.expenses.filter(expense => expense.amount > 0)) {
         const split = Array.isArray(e.splitBetween) ? e.splitBetween : []
         if (split.some(isMeName)) {
           const share = Number(e.amount) / Math.max(1, split.length)
@@ -413,7 +629,7 @@ export function useAppState(user) {
   const getReceivablesSummary = () => {
     const perPerson = {}
     for (const g of groups) {
-      for (const e of g.expenses) {
+      for (const e of g.expenses.filter(expense => expense.amount > 0)) {
         if (isMeName(e.paidBy)) {
           const split = Array.isArray(e.splitBetween) ? e.splitBetween : []
           const share = Number(e.amount) / Math.max(1, split.length)
@@ -433,7 +649,7 @@ export function useAppState(user) {
   const getPayablesSummary = () => {
     const perPerson = {}
     for (const g of groups) {
-      for (const e of g.expenses) {
+      for (const e of g.expenses.filter(expense => expense.amount > 0)) {
         const split = Array.isArray(e.splitBetween) ? e.splitBetween : []
         if (!isMeName(e.paidBy) && split.some(isMeName)) {
           const share = Number(e.amount) / Math.max(1, split.length)
@@ -510,15 +726,7 @@ export function useAppState(user) {
     }
   }
 
-  const setBudget = (category, budgetData) => {
-    setBudgets(prev => {
-      if (budgetData === null) {
-        const { [category]: removed, ...rest } = prev
-        return rest
-      }
-      return { ...prev, [category]: budgetData }
-    })
-  }
+
 
   // Smart categorization: sugiere categoría basada en descripción
   const suggestCategory = (description) => {
@@ -695,11 +903,13 @@ export function useAppState(user) {
     groups,
     groupInvites,
     recurringPayments,
-    budgets,
     addPersonalExpense,
     updatePersonalExpense,
     deletePersonalExpense,
     addGroup,
+    joinGroupByInviteLink,
+    joinGroupBySpecificLink,
+    joinGroupByGeneralLink,
     addGroupExpense,
     updateGroupExpense,
     deleteGroupExpense,
@@ -708,7 +918,6 @@ export function useAppState(user) {
     getGroupBalance,
     getMinimalTransfers,
     getChartData,
-    setBudget,
     suggestCategory,
     detectRecurringExpenses,
     getUnifiedExpenses,
@@ -722,7 +931,6 @@ export function useAppState(user) {
     updateGroupRecurringPayment,
     deleteGroupRecurringPayment,
     markGroupRecurringAsPaid,
-    inviteUserToGroup,
     acceptGroupInvite,
     joinGroupById
   }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Storage CORS Fix</title>
+</head>
+<body>
+    <h2>Solución temporal para CORS</h2>
+    <p>Mientras se resuelve el problema de CORS, sigue estos pasos:</p>
+    
+    <h3>📋 Pasos manuales en Firebase Console:</h3>
+    <ol>
+        <li>Ve a <a href="https://console.firebase.google.com/project/tricount-a6a39/storage/tricount-a6a39.appspot.com/rules" target="_blank">Firebase Console - Storage Rules</a></li>
+        <li>Reemplaza las reglas actuales con:</li>
+        <pre><code>rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}</code></pre>
+        <li>Haz clic en "Publicar"</li>
+        <li>Espera 2-3 minutos para que se propague</li>
+    </ol>
+
+    <h3>🔧 Configuración CORS alternativa:</h3>
+    <p>Si tienes acceso a Google Cloud Console:</p>
+    <ol>
+        <li>Ve a <a href="https://console.cloud.google.com/storage/browser/tricount-a6a39.appspot.com" target="_blank">Google Cloud Storage</a></li>
+        <li>Selecciona el bucket "tricount-a6a39.appspot.com"</li>
+        <li>Ve a "Permisos" → "CORS"</li>
+        <li>Agrega esta configuración:</li>
+        <pre><code>[
+  {
+    "origin": ["http://localhost:5173", "http://localhost:3000", "https://tricount-a6a39.web.app"],
+    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization", "Content-Length", "User-Agent", "x-goog-resumable"]
+  }
+]</code></pre>
+    </ol>
+
+    <h3>✅ Verificación:</h3>
+    <p>Una vez aplicados los cambios, recarga la aplicación y prueba la funcionalidad de subida de tickets.</p>
+
+    <h3>🚨 Nota de seguridad:</h3>
+    <p><strong>Importante:</strong> Las reglas actuales permiten acceso completo. Después de resolver CORS, cambia las reglas a:</p>
+    <pre><code>rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /tickets/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /profiles/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}</code></pre>
+</body>
+</html>

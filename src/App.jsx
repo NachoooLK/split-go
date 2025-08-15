@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { User, Users, Plus, BarChart3, Target, Settings as SettingsIcon, UserPlus } from 'lucide-react'
+import { User, Users, Plus, BarChart3, Settings as SettingsIcon, UserPlus } from 'lucide-react'
 import PersonalView from './components/PersonalView'
 import GroupsView from './components/GroupsView'
 import AdvancedAnalytics from './components/AdvancedAnalytics'
-import BudgetSystem from './components/BudgetSystem'
 import AddExpenseModal from './components/AddExpenseModal'
 import AddGroupModal from './components/AddGroupModal'
 import SettingsModal from './components/SettingsModal'
 import FriendsView from './components/FriendsView'
 import MobileNav from './components/MobileNav'
 import Toast from './components/Toast'
+import InviteLinkHandler from './components/InviteLinkHandler'
 import { useAppState } from './hooks/useAppState'
 import { useUserSettings } from './hooks/useUserSettings'
 
@@ -34,7 +34,6 @@ function App({ user, logout }) {
   const {
     personalExpenses,
     groups,
-    budgets,
     groupInvites,
     recurringPayments,
     addPersonalExpense,
@@ -47,10 +46,11 @@ function App({ user, logout }) {
     getPersonalStats,
     getGroupBalance,
     getMinimalTransfers,
-    inviteUserToGroup,
+    joinGroupByInviteLink,
+    joinGroupBySpecificLink,
+    joinGroupByGeneralLink,
     acceptGroupInvite,
     joinGroupById,
-    setBudget,
     suggestCategory,
     detectRecurringExpenses,
     addRecurringPayment,
@@ -137,21 +137,21 @@ function App({ user, logout }) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-indigo-50 overflow-x-hidden">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900 transition-colors duration-200 overflow-x-hidden">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-30">
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-slate-200/60 dark:border-gray-700/60 sticky top-0 z-30 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
                 <span className="text-xl">💰</span>
               </div>
-              <h1 className="text-2xl font-bold text-gradient">SplitGo</h1>
+              <h1 className="text-2xl font-bold text-gradient dark:text-white">SplitGo</h1>
             </div>
             <div className="flex items-center space-x-3">
-              <span className="text-sm text-slate-600 hidden sm:inline">{user?.email || user?.displayName}</span>
-              <button onClick={() => setShowSettings(true)} className="p-2 hover:bg-slate-100 rounded-lg" title="Ajustes">
-                <SettingsIcon className="w-5 h-5 text-slate-600" />
+              <span className="text-sm text-slate-600 dark:text-gray-300 hidden sm:inline">{user?.email || user?.displayName}</span>
+              <button onClick={() => setShowSettings(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200" title="Ajustes">
+                <SettingsIcon className="w-5 h-5 text-slate-600 dark:text-gray-300" />
               </button>
               <button onClick={() => setShowLogoutConfirm(true)} className="btn-secondary py-2">Salir</button>
             </div>
@@ -178,13 +178,7 @@ function App({ user, logout }) {
                 <BarChart3 className="w-5 h-5 mr-2" />
                 Analytics
               </button>
-              <button
-                onClick={() => setActiveTab('budgets')}
-                className={`nav-tab ${activeTab === 'budgets' ? 'active' : ''}`}
-              >
-                <Target className="w-5 h-5 mr-2" />
-                Presupuestos
-              </button>
+
               <button
                 onClick={() => setActiveTab('friends')}
                 className={`nav-tab ${activeTab === 'friends' ? 'active' : ''}`}
@@ -207,7 +201,7 @@ function App({ user, logout }) {
           const dx = e.changedTouches[0].clientX - startX
           const dy = e.changedTouches[0].clientY - startY
           if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
-            const tabs = ['personal','groups','analytics','budgets','friends']
+            const tabs = ['personal','groups','analytics','friends']
             const idx = tabs.indexOf(activeTab)
             if (dx < 0 && idx < tabs.length - 1) setActiveTab(tabs[idx+1])
             if (dx > 0 && idx > 0) setActiveTab(tabs[idx-1])
@@ -265,7 +259,7 @@ function App({ user, logout }) {
             getMinimalTransfers={getMinimalTransfers}
             formatCurrency={formatCurrency}
             groupInvites={groupInvites}
-            inviteUserToGroup={inviteUserToGroup}
+    
             acceptGroupInvite={acceptGroupInvite}
             user={user}
             selectedGroup={selectedGroup}
@@ -318,17 +312,7 @@ function App({ user, logout }) {
           </div>
         )}
         
-        {activeTab === 'budgets' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <BudgetSystem
-              expenses={personalExpenses}
-              categories={CATEGORIES}
-              formatCurrency={formatCurrency}
-              budgets={budgets}
-              onSetBudget={setBudget}
-            />
-          </div>
-        )}
+
 
         {activeTab === 'friends' && (
           <FriendsView user={user} formatCurrency={formatCurrency} showToast={showToast} />
@@ -343,27 +327,41 @@ function App({ user, logout }) {
             setShowAddExpense(true)
           } else if (activeTab === 'groups') {
             if (selectedGroup) {
+              // Mantener el grupo seleccionado para agregar gasto al grupo
               setShowAddExpense(true)
             } else {
               setShowAddGroup(true)
             }
-          } else if (activeTab === 'budgets') {
-            // En presupuestos no hay FAB específico, se manejan desde el componente
-            return
           } else if (activeTab === 'friends') {
             return
           }
         }}
-        className={`fixed bottom-6 sm:bottom-6 bottom-24 right-6 w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-110 flex items-center justify-center z-20 ${
-          (activeTab === 'budgets' || activeTab === 'friends') ? 'hidden' : ''
+        className={`fixed right-6 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center justify-center z-40 hidden sm:flex ${
+          activeTab === 'friends' ? 'hidden sm:hidden' : ''
         }`}
         style={{ bottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+        title={selectedGroup ? `Agregar gasto a ${selectedGroup.name}` : activeTab === 'groups' ? 'Crear grupo' : 'Agregar gasto personal'}
       >
-        <Plus className="w-8 h-8" />
+        <Plus className="w-6 h-6" />
       </button>
 
       {/* Mobile nav */}
-      <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} language={settings.language || 'es'} />
+      <MobileNav 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        language={settings.language || 'es'}
+        onAddExpense={(group = null) => {
+          if (group) {
+            setSelectedGroup(group)
+          } else if (activeTab === 'personal' || activeTab === 'analytics') {
+            setSelectedGroup(null)
+          }
+          // Si estamos en groups y hay selectedGroup, mantenerlo
+          setShowAddExpense(true)
+        }}
+        onAddGroup={() => setShowAddGroup(true)}
+        selectedGroup={selectedGroup}
+      />
 
       {/* Modals */}
       {showAddExpense && (
@@ -373,6 +371,7 @@ function App({ user, logout }) {
           onAdd={handleAddExpense}
           onClose={() => setShowAddExpense(false)}
           suggestCategory={suggestCategory}
+          user={user}
         />
       )}
 
@@ -380,6 +379,7 @@ function App({ user, logout }) {
         <AddGroupModal
           onAdd={handleAddGroup}
           onClose={() => setShowAddGroup(false)}
+          user={user}
         />
       )}
 
@@ -393,7 +393,7 @@ function App({ user, logout }) {
 
       {/* Confirmación de salida */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={()=>setShowLogoutConfirm(false)}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40" onClick={()=>setShowLogoutConfirm(false)}>
           <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm" onClick={(e)=>e.stopPropagation()}>
             <h2 className="text-lg font-semibold text-slate-900 mb-2">¿Cerrar sesión?</h2>
             <p className="text-sm text-slate-600 mb-4">Tendrás que iniciar sesión de nuevo para acceder a tus datos.</p>
@@ -406,6 +406,27 @@ function App({ user, logout }) {
       )}
 
       {/* Toast */}
+      {/* Invite Link Handler */}
+      <InviteLinkHandler 
+        user={user}
+        onJoinSuccess={async (joinData, inviteType) => {
+          try {
+            if (inviteType === 'general') {
+              await joinGroupByGeneralLink(joinData)
+              setToast({ message: `¡Te has unido al grupo como "${joinData.userName}"!`, type: 'success' })
+            } else {
+              await joinGroupBySpecificLink(joinData)
+              setToast({ message: '¡Te has unido al grupo exitosamente!', type: 'success' })
+            }
+            // Switch to groups tab to show the new group
+            setActiveTab('groups')
+          } catch (error) {
+            console.error('Join error:', error)
+            setToast({ message: 'Error al unirse al grupo', type: 'error' })
+          }
+        }}
+      />
+
       {toast && (
         <Toast
           message={toast.message}

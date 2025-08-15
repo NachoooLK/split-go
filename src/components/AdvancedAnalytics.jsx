@@ -352,166 +352,173 @@ function AdvancedAnalytics({ expenses, categories, className = '', formatCurrenc
   return (
     <div className={`space-y-8 ${className}`}>
       {/* Header con controles */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-            <Brain className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">Analytics Avanzados</h2>
-            <p className="text-slate-600">Insights inteligentes sobre tus gastos</p>
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+                          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-gray-100 truncate">Analytics Avanzados</h2>
+            <p className="text-sm sm:text-base text-slate-600 dark:text-gray-400 truncate">Insights inteligentes sobre tus gastos</p>
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center space-x-3">
-          {/* Selector de rango temporal */}
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="input-field"
-          >
-            <option value="week">Última semana</option>
-            <option value="month">Este mes</option>
-            <option value="3months">Últimos 3 meses</option>
-            <option value="year">Último año</option>
-          </select>
-          
-          {/* Selector de tipo de gráfico */}
-          <select
-            value={chartType}
-            onChange={(e) => setChartType(e.target.value)}
-            className="input-field"
-          >
-            <option value="trends">Tendencias</option>
-            <option value="categories">Por categorías</option>
-            <option value="patterns">Patrones semanales</option>
-          </select>
+        {/* Controles responsivos */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 flex-1">
+            {/* Selector de rango temporal */}
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="input-field text-sm sm:text-base min-w-0"
+            >
+              <option value="week">Última semana</option>
+              <option value="month">Este mes</option>
+              <option value="3months">Últimos 3 meses</option>
+              <option value="year">Último año</option>
+            </select>
+            
+            {/* Selector de tipo de gráfico */}
+            <select
+              value={chartType}
+              onChange={(e) => setChartType(e.target.value)}
+              className="input-field text-sm sm:text-base min-w-0"
+            >
+              <option value="trends">Tendencias</option>
+              <option value="categories">Por categorías</option>
+              <option value="patterns">Patrones semanales</option>
+            </select>
+          </div>
           
           {/* Botón de exportar */}
           <button
             onClick={exportData}
-            className="btn-secondary flex items-center space-x-2"
+            className="btn-secondary flex items-center justify-center space-x-2 text-sm sm:text-base whitespace-nowrap"
           >
-            <Download className="w-5 h-5" />
+            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>Exportar CSV</span>
           </button>
         </div>
       </div>
 
       {/* KPIs principales */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="card p-4 sm:p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-1">Total período</p>
-              <p className="text-3xl font-bold text-slate-900">{formatCurrency ? formatCurrency(analytics.currentTotal) : `€${analytics.currentTotal.toFixed(2)}`}</p>
-              <p className={`text-sm mt-1 flex items-center ${
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-400 mb-1">Total período</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-gray-100 truncate">{formatCurrency ? formatCurrency(analytics.currentTotal) : `€${analytics.currentTotal.toFixed(2)}`}</p>
+              <p className={`text-xs sm:text-sm mt-1 flex items-center ${
                 analytics.change >= 0 ? 'text-red-600' : 'text-green-600'
               }`}>
-                <TrendingUp className={`w-4 h-4 mr-1 ${analytics.change < 0 ? 'rotate-180' : ''}`} />
-                {Math.abs(analytics.change).toFixed(1)}% vs anterior
+                <TrendingUp className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0 ${analytics.change < 0 ? 'rotate-180' : ''}`} />
+                <span className="truncate">{Math.abs(analytics.change).toFixed(1)}% vs anterior</span>
               </p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 flex items-center justify-center flex-shrink-0 ml-3">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-1">Predicción mensual</p>
-              <p className="text-3xl font-bold text-slate-900">{formatCurrency ? formatCurrency(analytics.monthlyPrediction) : `€${analytics.monthlyPrediction.toFixed(2)}`}</p>
-              <p className="text-sm text-slate-600 mt-1">Basado en tendencia actual</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-400 mb-1">Predicción mensual</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-gray-100 truncate">{formatCurrency ? formatCurrency(analytics.monthlyPrediction) : `€${analytics.monthlyPrediction.toFixed(2)}`}</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-400 mt-1 truncate">Basado en tendencia actual</p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 flex items-center justify-center">
-              <Target className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 flex items-center justify-center flex-shrink-0 ml-3">
+              <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-1">Categoría principal</p>
-              <p className="text-2xl font-bold text-slate-900">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-400 mb-1">Categoría principal</p>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-gray-100 truncate">
                 {analytics.topCategories[0] ? categories[analytics.topCategories[0][0]]?.name : 'N/A'}
               </p>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-400 mt-1 truncate">
                 {analytics.topCategories[0] ? (formatCurrency ? formatCurrency(analytics.topCategories[0][1]) : `€${analytics.topCategories[0][1].toFixed(2)}`) : (formatCurrency ? formatCurrency(0) : '0.00')}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 flex items-center justify-center">
-              <span className="text-xl">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 flex items-center justify-center flex-shrink-0 ml-3">
+              <span className="text-lg sm:text-xl">
                 {analytics.topCategories[0] ? categories[analytics.topCategories[0][0]]?.emoji : '📊'}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-1">Promedio diario</p>
-              <p className="text-3xl font-bold text-slate-900">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-400 mb-1">Promedio diario</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-gray-100 truncate">
                 {formatCurrency ? formatCurrency(analytics.currentExpenses.length > 0 ? (analytics.currentTotal / analytics.currentExpenses.length) : 0) : `€${analytics.currentExpenses.length > 0 ? (analytics.currentTotal / analytics.currentExpenses.length).toFixed(2) : '0.00'}`}
               </p>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-400 mt-1 truncate">
                 {analytics.currentExpenses.length} transacciones
               </p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0 ml-3">
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Gráfico principal */}
-      <div className="card p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-6 flex items-center">
-          <Zap className="w-6 h-6 mr-2 text-indigo-600" />
-          Análisis Visual
+      <div className="card p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-gray-100 mb-4 sm:mb-6 flex items-center">
+          <Zap className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-indigo-600 flex-shrink-0" />
+          <span className="truncate">Análisis Visual</span>
         </h3>
-        {renderChart()}
+        <div className="overflow-x-auto">
+          {renderChart()}
+        </div>
       </div>
 
       {/* Insights inteligentes */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-            <Brain className="w-6 h-6 mr-2 text-purple-600" />
-            Insights Inteligentes
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+        <div className="card p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+            <Brain className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-purple-600 flex-shrink-0" />
+            <span className="truncate">Insights Inteligentes</span>
           </h3>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {analytics.change > 15 && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-800 text-sm">
+              <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-800 text-xs sm:text-sm">
                   ⚠️ <strong>Alerta:</strong> Tus gastos han aumentado un {analytics.change.toFixed(1)}% comparado con el período anterior.
                 </p>
               </div>
             )}
             
             {analytics.change < -15 && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-800 text-sm">
+              <div className="p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-green-800 text-xs sm:text-sm">
                   ✅ <strong>¡Excelente!</strong> Has reducido tus gastos un {Math.abs(analytics.change).toFixed(1)}% comparado con el período anterior.
                 </p>
               </div>
             )}
             
             {analytics.monthlyPrediction > analytics.currentTotal * 1.5 && (
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-amber-800 text-sm">
+              <div className="p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-amber-800 text-xs sm:text-sm">
                   📈 <strong>Predicción:</strong> A este ritmo, podrías gastar {formatCurrency ? formatCurrency(analytics.monthlyPrediction) : `€${analytics.monthlyPrediction.toFixed(2)}`} este mes.
                 </p>
               </div>
             )}
             
             {Object.entries(analytics.dayPatterns).length > 0 && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-blue-800 text-sm">
+              <div className="p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-blue-800 text-xs sm:text-sm">
                   📅 <strong>Patrón detectado:</strong> Sueles gastar más los {
                     Object.entries(analytics.dayPatterns)
                       .sort(([,a], [,b]) => b - a)[0]?.[0]?.toLowerCase()
@@ -522,8 +529,8 @@ function AdvancedAnalytics({ expenses, categories, className = '', formatCurrenc
           </div>
         </div>
 
-        <div className="card p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Top Categorías</h3>
+        <div className="card p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-gray-100 mb-3 sm:mb-4">Top Categorías</h3>
           <div className="space-y-3">
             {analytics.topCategories.map(([category, amount], index) => {
               const categoryInfo = categories[category]
@@ -531,16 +538,16 @@ function AdvancedAnalytics({ expenses, categories, className = '', formatCurrenc
               
               return (
                 <div key={category} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{categoryInfo?.emoji}</span>
-                    <div>
-                      <div className="font-medium text-slate-900">{categoryInfo?.name}</div>
-                      <div className="text-sm text-slate-600">{percentage.toFixed(1)}% del total</div>
+                  <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                    <span className="text-lg sm:text-xl flex-shrink-0">{categoryInfo?.emoji}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-slate-900 dark:text-gray-100 text-sm sm:text-base truncate">{categoryInfo?.name}</div>
+                      <div className="text-xs sm:text-sm text-slate-600 dark:text-gray-400">{percentage.toFixed(1)}% del total</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-slate-900">{formatCurrency ? formatCurrency(amount) : `€${amount.toFixed(2)}`}</div>
-                    <div className="text-sm text-slate-600">#{index + 1}</div>
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <div className="font-bold text-slate-900 dark:text-gray-100 text-sm sm:text-base">{formatCurrency ? formatCurrency(amount) : `€${amount.toFixed(2)}`}</div>
+                    <div className="text-xs sm:text-sm text-slate-600 dark:text-gray-400">#{index + 1}</div>
                   </div>
                 </div>
               )
@@ -552,20 +559,20 @@ function AdvancedAnalytics({ expenses, categories, className = '', formatCurrenc
       {/* Sección de "Gastos recurrentes detectados" retirada a petición del usuario */}
 
       {/* Pagos recurrentes configurados */}
-      <div className="card p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-          <RefreshCcw className="w-5 h-5 mr-2 text-indigo-600" />
-          Pagos recurrentes configurados
+      <div className="card p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+          <RefreshCcw className="w-5 h-5 mr-2 text-indigo-600 flex-shrink-0" />
+          <span className="truncate">Pagos recurrentes configurados</span>
         </h3>
         {onAddRecurring && (
           <div className="mb-4">
             {!showAddRecurring ? (
-              <button className="btn-primary flex items-center space-x-2" onClick={() => setShowAddRecurring(true)}>
-                <Plus className="w-4 h-4" />
+              <button className="btn-primary flex items-center justify-center space-x-2 text-sm sm:text-base whitespace-nowrap" onClick={() => setShowAddRecurring(true)}>
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Añadir pago recurrente</span>
               </button>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
                 <div>
                   <label className="label">Descripción</label>
                   <input className="input-field" value={newRecurring.description} onChange={(e)=>setNewRecurring(v=>({...v, description: e.target.value}))} placeholder="Google Pay" />
@@ -593,7 +600,7 @@ function AdvancedAnalytics({ expenses, categories, className = '', formatCurrenc
                   <label className="label">Próxima fecha</label>
                   <input type="date" className="input-field" value={newRecurring.nextDate} onChange={(e)=>setNewRecurring(v=>({...v, nextDate: e.target.value}))} />
                 </div>
-                <div className="md:col-span-5 flex items-center space-x-2">
+                <div className="sm:col-span-2 lg:col-span-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <button
                     className="btn-primary"
                     onClick={async ()=>{
@@ -617,33 +624,35 @@ function AdvancedAnalytics({ expenses, categories, className = '', formatCurrenc
           </div>
         )}
         {configuredRecurring.length === 0 ? (
-          <p className="text-sm text-slate-600">Aún no has configurado pagos recurrentes.</p>
+          <p className="text-sm text-slate-600 dark:text-gray-400">Aún no has configurado pagos recurrentes.</p>
         ) : (
-          <div className="divide-y divide-slate-200">
+                      <div className="divide-y divide-slate-200 dark:divide-gray-700">
             {configuredRecurring.map((rec) => (
-              <div key={rec.id} className="py-3 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <span className="text-xl">{categories[rec.category]?.emoji || '🔁'}</span>
-                  <div>
-                    <div className="font-medium text-slate-900">{rec.description}</div>
-                    <div className="text-xs text-slate-600">
+              <div key={rec.id} className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                  <span className="text-lg sm:text-xl flex-shrink-0">{categories[rec.category]?.emoji || '🔁'}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-slate-900 dark:text-gray-100 text-sm sm:text-base truncate">{rec.description}</div>
+                    <div className="text-xs text-slate-600 dark:text-gray-400">
                       Frecuencia: <span className="uppercase font-semibold">{rec.frequency}</span>
                       <span className="mx-2">•</span>
                       Próxima fecha: {rec.nextDate ? format(rec.nextDate, 'yyyy-MM-dd') : 'No definida'}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="text-right">
-                    <div className="font-bold text-slate-900">{formatCurrency ? formatCurrency(rec.amount) : `€${Number(rec.amount).toFixed(2)}`}</div>
-                    <div className="text-xs text-slate-500">{categories[rec.category]?.name || rec.category}</div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                  <div className="text-left sm:text-right">
+                    <div className="font-bold text-slate-900 dark:text-gray-100 text-sm sm:text-base">{formatCurrency ? formatCurrency(rec.amount) : `€${Number(rec.amount).toFixed(2)}`}</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">{categories[rec.category]?.name || rec.category}</div>
                   </div>
-                  {onMarkPaid && (
-                    <button className="btn-secondary" onClick={() => onMarkPaid(rec.id)}>Registrar pago</button>
-                  )}
-                  {onDeleteRecurring && (
-                    <button className="btn-danger" onClick={() => onDeleteRecurring(rec.id)}>Eliminar</button>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    {onMarkPaid && (
+                      <button className="btn-secondary text-xs sm:text-sm px-3 py-2" onClick={() => onMarkPaid(rec.id)}>Registrar pago</button>
+                    )}
+                    {onDeleteRecurring && (
+                      <button className="btn-danger text-xs sm:text-sm px-3 py-2" onClick={() => onDeleteRecurring(rec.id)}>Eliminar</button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

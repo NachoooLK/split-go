@@ -6,6 +6,7 @@ const DEFAULT_SETTINGS = {
   currency: 'EUR',
   decimal: 'comma', // 'comma' (es-ES) or 'dot' (en-US)
   language: 'es', // BCP-47 code like 'es', 'en', 'fr', 'pt-BR'
+  theme: 'light', // 'light', 'dark', 'auto'
 }
 
 export function useUserSettings(user) {
@@ -23,6 +24,25 @@ export function useUserSettings(user) {
     })
     return () => unsub()
   }, [user?.uid])
+
+  // Aplicar tema al HTML
+  useEffect(() => {
+    const html = document.documentElement
+    const isDark = settings.theme === 'dark' || 
+      (settings.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    
+    if (isDark) {
+      html.classList.add('dark')
+      // Cambiar meta theme-color para dark mode
+      const metaTheme = document.querySelector('meta[name="theme-color"]')
+      if (metaTheme) metaTheme.content = '#111827'
+    } else {
+      html.classList.remove('dark')
+      // Cambiar meta theme-color para light mode
+      const metaTheme = document.querySelector('meta[name="theme-color"]')
+      if (metaTheme) metaTheme.content = '#4f46e5'
+    }
+  }, [settings.theme])
 
   const locale = useMemo(() => {
     if (settings?.language) return settings.language

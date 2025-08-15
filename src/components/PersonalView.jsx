@@ -87,11 +87,11 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
   }, [filteredExpenses])
 
   const StatCard = ({ title, value, icon: Icon, gradient }) => (
-    <div className="p-4 rounded-xl border border-slate-200 bg-white">
+    <div className="p-4 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors duration-200">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium text-slate-500 mb-1">{title}</p>
-          <p className="text-2xl font-bold text-slate-900">{value}</p>
+          <p className="text-xs font-medium text-slate-500 dark:text-gray-400 mb-1">{title}</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-gray-100">{value}</p>
         </div>
         <div className={`w-9 h-9 rounded-lg bg-gradient-to-r ${gradient} flex items-center justify-center`}>
           <Icon className="w-5 h-5 text-white" />
@@ -148,8 +148,8 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
               </div>
             ) : (
               <div>
-                <h3 className="font-semibold text-slate-900 truncate max-w-[180px] sm:max-w-none">{expense.description}</h3>
-                <p className="text-sm text-slate-600">
+                <h3 className="font-semibold text-slate-900 dark:text-gray-100 truncate max-w-[180px] sm:max-w-none">{expense.description}</h3>
+                <p className="text-sm text-slate-600 dark:text-gray-400">
                   {expense.date.toLocaleDateString('es-ES', { 
                     weekday: 'short', 
                     day: 'numeric', 
@@ -167,15 +167,15 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
               </div>
             ) : (
               <>
-                <p className="text-2xl font-bold text-slate-900">{formatCurrency ? formatCurrency(expense.amount) : `€${expense.amount.toFixed(2)}`}</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-gray-100">{formatCurrency ? formatCurrency(expense.amount) : `€${expense.amount.toFixed(2)}`}</p>
                 <div className="flex items-center justify-end space-x-2 mt-1 sm:mt-2">
                   {!isGroupShare ? (
                     <>
-                      <button onClick={()=>setIsEditing(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"><Pencil className="w-4 h-4"/></button>
-                      <button onClick={()=>onDeleteExpense(expense.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4"/></button>
+                      <button onClick={()=>setIsEditing(true)} className="p-2 text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"><Pencil className="w-4 h-4"/></button>
+                      <button onClick={()=>onDeleteExpense(expense.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"><Trash2 className="w-4 h-4"/></button>
                     </>
                   ) : (
-                    <span className="px-2 py-1 text-xs rounded-lg bg-slate-100 text-slate-600 border border-slate-200">De grupo</span>
+                    <span className="px-2 py-1 text-xs rounded-lg bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-gray-600">De grupo</span>
                   )}
                 </div>
                 <div className="flex items-center justify-end gap-2 mt-1">
@@ -199,13 +199,13 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
       <div className="w-24 h-24 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <span className="text-4xl">💸</span>
       </div>
-      <h3 className="text-xl font-semibold text-slate-900 mb-2">
+      <h3 className="text-xl font-semibold text-slate-900 dark:text-gray-100 mb-2">
         {searchTerm || selectedCategory !== 'all' || dateFilter !== 'all' 
           ? 'No se encontraron gastos' 
           : '¡Empieza a trackear tus gastos!'
         }
       </h3>
-      <p className="text-slate-600 mb-6">
+      <p className="text-slate-600 dark:text-gray-400 mb-6">
         {searchTerm || selectedCategory !== 'all' || dateFilter !== 'all'
           ? 'Prueba con otros filtros o busca algo diferente'
           : 'Añade tu primer gasto y comienza a tener control sobre tus finanzas'
@@ -222,11 +222,11 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {/* Header con acciones compactas */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900">Dashboard Personal</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-gray-100">Dashboard Personal</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowExpensesModal(true)}
-            className="px-3 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:border-indigo-300 flex items-center gap-2"
+            className="px-3 py-2 rounded-xl bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 flex items-center gap-2 transition-colors duration-200"
             aria-label="Buscar y ver gastos"
           >
             <Search className="w-4 h-4" />
@@ -276,8 +276,8 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
       {/* Análisis por categoría */}
       {categoryAnalysis.length > 0 && (
         <div className="card p-6">
-          <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center">
-            <BarChart3 className="w-6 h-6 mr-2 text-indigo-600" />
+          <h2 className="text-xl font-bold text-slate-900 dark:text-gray-100 mb-6 flex items-center">
+            <BarChart3 className="w-6 h-6 mr-2 text-indigo-600 dark:text-indigo-400" />
             Gastos por Categoría
           </h2>
           <div className="space-y-4">
@@ -298,10 +298,10 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                     <span className="text-2xl">{categoryInfo.emoji}</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-slate-900">{categoryInfo.name}</span>
-                        <span className="text-sm text-slate-600">{percentage.toFixed(1)}%</span>
+                        <span className="font-medium text-slate-900 dark:text-gray-100">{categoryInfo.name}</span>
+                        <span className="text-sm text-slate-600 dark:text-gray-400">{percentage.toFixed(1)}%</span>
                       </div>
-                      <div className="w-full bg-slate-200 rounded-full h-3">
+                      <div className="w-full bg-slate-200 dark:bg-gray-600 rounded-full h-3">
                         <div 
                           className={`h-3 rounded-full bg-gradient-to-r ${colorClasses[categoryInfo.color]} transition-all duration-500`}
                           style={{ width: `${percentage}%` }}
@@ -310,7 +310,7 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-lg font-bold text-slate-900">
+                    <span className="text-lg font-bold text-slate-900 dark:text-gray-100">
                       {formatCurrency ? formatCurrency(amount) : `€${amount.toFixed(2)}`}
                     </span>
                   </div>
@@ -326,8 +326,8 @@ function PersonalView({ expenses, categories, stats, onAddExpense, onEditExpense
 
       {/* Modal combinado: filtros + resultados */}
       {showExpensesModal && (
-        <div className="modal-backdrop" onClick={()=>setShowExpensesModal(false)}>
-          <div className="modal-content" onClick={(e)=>e.stopPropagation()}>
+        <div className="modal-backdrop z-[55]" onClick={()=>setShowExpensesModal(false)}>
+          <div className="modal-content z-[55]" onClick={(e)=>e.stopPropagation()}>
             <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-auto animate-scale-in p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-slate-900">Buscar y filtrar gastos</h3>

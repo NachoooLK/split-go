@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/usuario/projects/split-go/logs/.6d7d28251af152cbb4aa21a03ef7f9b1deeb89a9-audit.json",
+    "files": [
+        {
+            "date": 1755203636745,
+            "name": "/Users/usuario/projects/split-go/logs/mcp-puppeteer-2025-08-14.log",
+            "hash": "4f09f25ef41a68a368232371d9ea2915e75d221e0efb0e8bdda2cc0f17fdad86"
+        }
+    ],
+    "hashType": "sha256"
+}
