@@ -120,6 +120,83 @@ export function useAppState(user) {
     return docRef.id
   }
 
+  // Abandonar un grupo
+  const leaveGroup = async (groupId) => {
+    if (!user || !groupId) return
+    
+    try {
+      const groupRef = doc(db, 'groups', groupId)
+      const groupDoc = await getDoc(groupRef)
+      
+      if (!groupDoc.exists()) {
+        throw new Error('Grupo no encontrado')
+      }
+      
+      const group = groupDoc.data()
+      
+      // Encontrar el nombre del usuario en el grupo
+      let userNameInGroup = user.displayName || user.email || 'Tú'
+      
+      // Buscar en membersUids si existe
+      if (group.membersUids && group.members) {
+        const userIndex = group.membersUids.indexOf(user.uid)
+        if (userIndex !== -1 && group.members[userIndex]) {
+          userNameInGroup = group.members[userIndex]
+        }
+      }
+      
+      // Verificar que el usuario está en el grupo
+      const isInGroup = group.members?.includes(userNameInGroup) || 
+                       group.membersUids?.includes(user.uid)
+      
+      if (!isInGroup) {
+        throw new Error('No estás en este grupo')
+      }
+      
+      // Si es el único miembro, eliminar el grupo completo
+      if (group.members && group.members.length === 1) {
+        // Eliminar todos los gastos del grupo
+        const expensesRef = collection(db, 'groups', groupId, 'expenses')
+        const expensesSnapshot = await getDocs(expensesRef)
+        
+        for (const expenseDoc of expensesSnapshot.docs) {
+          await deleteDoc(doc(db, 'groups', groupId, 'expenses', expenseDoc.id))
+        }
+        
+        // Eliminar el grupo
+        await deleteDoc(groupRef)
+      } else {
+        // Remover el usuario de las listas de miembros
+        const updatedMembers = group.members?.filter(member => member !== userNameInGroup) || []
+        const updatedMembersUids = group.membersUids?.filter(uid => uid !== user.uid) || []
+        
+        // Actualizar el grupo
+        await updateDoc(groupRef, {
+          members: updatedMembers,
+          membersUids: updatedMembersUids,
+          totalMembers: updatedMembers.length
+        })
+      }
+      
+      // Eliminar invitaciones pendientes del usuario para este grupo
+      const invitesQuery = query(
+        collection(db, 'groupInvites'),
+        where('groupId', '==', groupId),
+        where('inviteeUid', '==', user.uid)
+      )
+      
+      const invitesSnapshot = await getDocs(invitesQuery)
+      for (const inviteDoc of invitesSnapshot.docs) {
+        await deleteDoc(inviteDoc.ref)
+      }
+      
+      return true
+    } catch (error) {
+      console.error('Error al abandonar grupo:', error)
+      throw error
+    }
+  }
+
   // Unirse por enlace específico (para una persona concreta)
   const joinGroupBySpecificLink = async (joinData) => {
     const { groupId, slotId, userUid, userName, inviteToken } = joinData
@@ -912,6 +989,7 @@ export function useAppState(user) {
     updatePersonalExpense,
     deletePersonalExpense,
     addGroup,
+    leaveGroup,
     joinGroupByInviteLink,
     joinGroupBySpecificLink,
     joinGroupByGeneralLink,

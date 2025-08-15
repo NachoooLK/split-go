@@ -91,7 +91,7 @@ function MobileNav({
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-slate-200/50 dark:border-gray-700/50 z-50 sm:hidden mobile-nav-always-visible transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-slate-200/50 dark:border-gray-700/50 z-[100] sm:hidden mobile-nav-always-visible transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', display: 'block !important' }}>
       <div className="relative max-w-7xl mx-auto grid grid-cols-5 py-2 overflow-x-hidden">
         {/* Gradiente sutil en el fondo */}
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-indigo-50/5 to-transparent dark:via-indigo-900/5 pointer-events-none" />

@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react'
-import { ArrowLeft, Plus, Users, DollarSign, ArrowRight, CheckCircle, XCircle, CreditCard, AlertTriangle, Link, BarChart3, Filter, Search, Calendar, Tag, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Plus, Users, DollarSign, ArrowRight, CheckCircle, XCircle, CreditCard, AlertTriangle, Link, BarChart3, Filter, Search, Calendar, Tag, Eye, EyeOff, LogOut } from 'lucide-react'
 import GroupInviteDisplay from './GroupInviteDisplay'
 import ExpenseDetailModal from './ExpenseDetailModal'
 
-function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupBalance, getMinimalTransfers, onEditExpense, onDeleteExpense, onToggleSettled, onSettleExpense }) {
+function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupBalance, getMinimalTransfers, onEditExpense, onDeleteExpense, onToggleSettled, onSettleExpense, onLeaveGroup }) {
   const [activeTab, setActiveTab] = useState('expenses')
   const [settleForExpense, setSettleForExpense] = useState(null)
   const [selectedSettled, setSelectedSettled] = useState([])
@@ -380,6 +380,40 @@ function GroupDetails({ group, categories, user, onBack, onAddExpense, getGroupB
                 {group.createdAt ? new Date(group.createdAt.toDate ? group.createdAt.toDate() : group.createdAt).toLocaleDateString('es-ES') : 'N/A'}
               </span>
             </div>
+          </div>
+        </div>
+        
+        {/* Botón para abandonar grupo */}
+        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-gray-600">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+            <h4 className="font-semibold text-red-900 dark:text-red-100 mb-2 flex items-center">
+              <LogOut className="w-5 h-5 mr-2" />
+              Abandonar grupo
+            </h4>
+            <p className="text-sm text-red-700 dark:text-red-300 mb-4">
+              Al abandonar el grupo, ya no podrás ver los gastos ni participar en nuevas divisiones. 
+              {group.members.length === 1 ? ' Como eres el único miembro, el grupo será eliminado completamente.' : ''}
+            </p>
+            <button
+              onClick={async () => {
+                const confirmMessage = group.members.length === 1 
+                  ? '¿Estás seguro? Como eres el único miembro, el grupo será eliminado completamente y no se podrá recuperar.'
+                  : '¿Estás seguro de que quieres abandonar este grupo? No podrás volver a unirte sin una nueva invitación.';
+                
+                if (window.confirm(confirmMessage)) {
+                  try {
+                    await onLeaveGroup(group.id)
+                    onBack() // Volver a la vista de grupos
+                  } catch (error) {
+                    alert('Error al abandonar el grupo: ' + error.message)
+                  }
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>{group.members.length === 1 ? 'Eliminar grupo' : 'Abandonar grupo'}</span>
+            </button>
           </div>
         </div>
       </div>

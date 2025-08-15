@@ -40,6 +40,7 @@ function App({ user, logout }) {
     updatePersonalExpense,
     deletePersonalExpense,
     addGroup,
+    leaveGroup,
     addGroupExpense,
     updateGroupExpense,
     deleteGroupExpense,
@@ -295,6 +296,16 @@ function App({ user, logout }) {
               } catch (e) {
                 console.error(e)
                 showToast('No se pudo registrar el pago', 'error')
+              }
+            }}
+            onLeaveGroup={async (groupId) => {
+              try {
+                await leaveGroup(groupId)
+                setSelectedGroup(null)
+                showToast('Has abandonado el grupo exitosamente')
+              } catch (e) {
+                console.error(e)
+                showToast('Error al abandonar el grupo', 'error')
               }
             }}
             joinGroupById={joinGroupById}

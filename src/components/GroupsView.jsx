@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Users, Plus, ArrowRight, DollarSign, Clock, CheckCircle, AlertCircle, Check, X, ChevronDown, Search } from 'lucide-react'
 import GroupDetails from './GroupDetails'
 
-function GroupsView({ groups, categories, onAddGroup, onAddExpense, getGroupBalance, getMinimalTransfers, groupInvites = [], acceptGroupInvite, user, onDeleteExpense, joinGroupById, onEditExpense, onToggleSettled, selectedGroup, setSelectedGroup, onSettleExpense }) {
+function GroupsView({ groups, categories, onAddGroup, onAddExpense, getGroupBalance, getMinimalTransfers, groupInvites = [], acceptGroupInvite, user, onDeleteExpense, joinGroupById, onEditExpense, onToggleSettled, selectedGroup, setSelectedGroup, onSettleExpense, onLeaveGroup }) {
   const [joinId, setJoinId] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -88,7 +88,7 @@ function GroupsView({ groups, categories, onAddGroup, onAddExpense, getGroupBala
         onDeleteExpense={(groupId, expenseId)=> onDeleteExpense && onDeleteExpense(groupId, expenseId)}
         onToggleSettled={(groupId, expenseId, member, next)=> onToggleSettled && onToggleSettled(groupId, expenseId, member, next)}
         onSettleExpense={(groupId, expenseId, settledList)=> onSettleExpense && onSettleExpense(groupId, expenseId, settledList)}
-
+        onLeaveGroup={(groupId) => onLeaveGroup && onLeaveGroup(groupId)}
       />
     )
   }
