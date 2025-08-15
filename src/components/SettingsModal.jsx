@@ -13,17 +13,10 @@ function SettingsModal({ open, onClose, settings, onSave, currencies = ['EUR','U
     }
   }, [geminiApiKey])
   
-  if (!open) return null
+  // Mover hooks antes del return condicional para evitar violación de reglas de hooks
   const languageCodes = ['es','en']
-
-  const handleSaveApiKey = () => {
-    if (geminiApiKey.trim()) {
-      localStorage.setItem('gemini_api_key', geminiApiKey.trim())
-    } else {
-      localStorage.removeItem('gemini_api_key')
-    }
-  }
-
+  const languageOptions = useMemo(() => LANG_OPTIONS.filter(o => languageCodes.includes(o.code)), [])
+  
   const getLanguageEndonym = (code) => {
     try {
       // Try to render the language name in its own language (endonym)
@@ -39,7 +32,16 @@ function SettingsModal({ open, onClose, settings, onSave, currencies = ['EUR','U
     } catch {}
     return code
   }
-  const languageOptions = useMemo(() => LANG_OPTIONS.filter(o => languageCodes.includes(o.code)), [])
+
+  const handleSaveApiKey = () => {
+    if (geminiApiKey.trim()) {
+      localStorage.setItem('gemini_api_key', geminiApiKey.trim())
+    } else {
+      localStorage.removeItem('gemini_api_key')
+    }
+  }
+  
+  if (!open) return null
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content overflow-x-hidden" onClick={e => e.stopPropagation()}>
