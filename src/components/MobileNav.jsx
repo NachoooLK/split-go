@@ -11,6 +11,7 @@ function MobileNav({
   selectedGroup
 }) {
   const [labels, setLabels] = useState({ personal: 'Personal', groups: 'Grupos', analytics: 'Analytics', friends: 'Amigos' })
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640)
 
   useEffect(() => {
     setLabels({
@@ -20,6 +21,15 @@ function MobileNav({
       friends: t(language, 'nav.friends'),
     })
   }, [language])
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
   const Item = ({ tab, label, Icon }) => {
     const isActive = activeTab === tab
     
@@ -90,8 +100,21 @@ function MobileNav({
     // En 'friends' no hay acción de agregar
   }
 
+  if (!isMobile) return null
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-slate-200/50 dark:border-gray-700/50 z-[9999] block sm:hidden mobile-nav-always-visible transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+    <nav 
+      className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-slate-200/50 dark:border-gray-700/50 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]" 
+      style={{ 
+        position: 'fixed',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        width: '100%',
+        zIndex: '9999',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+      }}
+    >
       <div className="relative max-w-7xl mx-auto grid grid-cols-5 py-2 overflow-x-hidden">
         {/* Gradiente sutil en el fondo */}
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-indigo-50/5 to-transparent dark:via-indigo-900/5 pointer-events-none" />
