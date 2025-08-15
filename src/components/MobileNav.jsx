@@ -102,17 +102,23 @@ function MobileNav({
 
   if (!isMobile) return null
 
+  // Debug temporal
+  console.log('MobileNav renderizado para activeTab:', activeTab, 'isMobile:', isMobile)
+
   return (
     <nav 
-      className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-slate-200/50 dark:border-gray-700/50 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]" 
+      className="bg-white dark:bg-gray-900 border-t border-slate-200 dark:border-gray-700 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]" 
       style={{ 
         position: 'fixed',
         bottom: '0',
         left: '0',
         right: '0',
         width: '100%',
-        zIndex: '9999',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        height: 'auto',
+        minHeight: '60px',
+        zIndex: '99999',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1)'
       }}
     >
       <div className="relative max-w-7xl mx-auto grid grid-cols-5 py-2 overflow-x-hidden">
