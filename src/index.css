@@ -222,3 +222,24 @@
     height: auto;
   }
 }
+
+/* Forzar visibilidad del mobile nav */
+@layer components {
+  .mobile-nav-always-visible {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+  }
+  
+  @media (min-width: 640px) {
+    .mobile-nav-always-visible {
+      display: none !important;
+    }
+  }
+}
